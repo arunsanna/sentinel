@@ -52,6 +52,16 @@ def index():
     """Serve the main application page"""
     return render_template('index.html')
 
+@app.route('/debug')
+def debug():
+    """Debug page to test if the server is responding"""
+    return render_template('debug.html')
+
+@app.route('/simplified')
+def simplified():
+    """Serve a simplified version of the application page"""
+    return render_template('simplified.html')
+
 # API Routes
 @app.route('/api/scan/progress', methods=['GET'])
 def scan_progress_stream():

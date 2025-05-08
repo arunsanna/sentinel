@@ -21,10 +21,13 @@ The application features a modern, responsive glassmorphic design with the follo
 - **Glassmorphic Interface**: Frosted glass effect with depth and transparency
 - **Dark/Light Mode**: Toggle between dark and light themes for comfortable viewing
 - **Responsive Design**: Optimized for all device sizes with tailored mobile views
+- **Grid Layout**: Display repositories in a clean, modern grid format
+- **Detailed Repository View**: Click on any repository to view detailed information
+- **In-Place Pull Operations**: Pull repositories directly from the detail view
+- **Collapsible Logs**: Expand/collapse detailed operation logs within the repository view
 - **Progress Tracking**: Real-time visual feedback for scanning and pull operations
 - **Animated Elements**: Smooth transitions and loading animations
 - **Icon Integration**: Font Awesome icons for improved visual cues and usability
-- **Card-Based Mobile View**: Optimized mobile experience with expandable cards
 - **Interactive Logs**: Collapsible log panels for detailed operation information
 
 ## Getting Started

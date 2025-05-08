@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Repository Scanner</title>
-    <!-- React and ReactDOM -->
+    <!-- This will be used for development, React build files will replace this later -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <!-- Tailwind CSS -->
+    <!-- Include Tailwind CSS via CDN for development -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,11 +20,11 @@
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #e2e8f0;
+            color: #334155;
         }
         
         .glass {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.25);
             -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-radius: 16px;
@@ -32,247 +32,73 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         }
         
-        .repo-detail {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            z-index: 100;
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.65);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            color: #e2e8f0;
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-light {
+            background: rgba(255, 255, 255, 0.5);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-button {
+            background: rgba(37, 99, 235, 0.6);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: all 0.3s ease;
+        }
+        
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .repo-card {
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 100%;
             display: flex;
             flex-direction: column;
         }
-
-        .repo-detail-header {
-            position: sticky;
-            top: 0;
-            z-index: 5;
-            padding: 1rem;
-            margin: -1rem -1rem 1rem -1rem;
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            background-color: rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        
+        .repo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.2);
         }
-    </style>
-</head>
-<body class="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600">
-    <div id="root"></div>
-    
-    <script>
-        // App implementation
-        (function() {
-            // Simple Icon component
-            const Icon = function({ name, className }) { 
-                return React.createElement('i', { 
-                    className: `fas fa-${name} ${className || ''}` 
-                });
-            };
-            
-            // App component
-            function App() {
-                const [repositories, setRepositories] = React.useState([]);
-                const [loading, setLoading] = React.useState(true);
-                const [selectedRepo, setSelectedRepo] = React.useState(null);
-                
-                // Fetch repositories on load
-                React.useEffect(() => {
-                    const fetchRepositories = async () => {
-                        try {
-                            setLoading(true);
-                            const response = await fetch('/api/repositories');
-                            const data = await response.json();
-                            setRepositories(data);
-                            setLoading(false);
-                        } catch (error) {
-                            console.error("Error fetching repositories:", error);
-                            setLoading(false);
-                        }
-                    };
-                    
-                    fetchRepositories();
-                }, []);
-                
-                return React.createElement(
-                    'div', 
-                    { className: 'container mx-auto px-4 py-8' },
-                    
-                    // Header
-                    React.createElement(
-                        'header',
-                        { className: 'mb-8 text-center' },
-                        React.createElement(
-                            'div',
-                            { className: 'flex items-center justify-center mb-4' },
-                            React.createElement(Icon, { name: 'code-branch', className: 'text-4xl text-indigo-300 mr-4' }),
-                            React.createElement('h1', { className: 'text-4xl font-bold' }, 'Repository Scanner')
-                        ),
-                        React.createElement('p', { className: 'text-xl opacity-80' }, 'Monitor and manage your Git repositories')
-                    ),
-                    
-                    // Main content
-                    loading ? 
-                        // Loading state
-                        React.createElement(
-                            'div',
-                            { className: 'glass p-8 text-center' },
-                            React.createElement(Icon, { name: 'spinner', className: 'text-4xl animate-spin mb-4' }),
-                            React.createElement('p', { className: 'text-xl' }, 'Loading repositories...')
-                        ) :
-                        
-                        repositories.length === 0 ?
-                            // Empty state
-                            React.createElement(
-                                'div',
-                                { className: 'glass p-8 text-center' },
-                                React.createElement(Icon, { name: 'folder-open', className: 'text-4xl mb-4' }),
-                                React.createElement('p', { className: 'text-xl' }, 'No repositories found.')
-                            ) :
-                            
-                            // Repository list
-                            React.createElement(
-                                'div',
-                                { className: 'glass p-6' },
-                                React.createElement('h2', { className: 'text-2xl font-bold mb-6 flex items-center' }, 
-                                    React.createElement(Icon, { name: 'list', className: 'mr-3' }),
-                                    `Repositories (${repositories.length})`
-                                ),
-                                React.createElement(
-                                    'div',
-                                    { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' },
-                                    repositories.map(repo => React.createElement(
-                                        'div',
-                                        { 
-                                            key: repo.id,
-                                            className: 'glass p-4 hover:shadow-lg transition-all cursor-pointer',
-                                            onClick: () => setSelectedRepo(repo)
-                                        },
-                                        React.createElement('h3', { className: 'font-bold text-lg mb-2 flex items-center' }, 
-                                            React.createElement(Icon, { name: 'folder', className: 'mr-2 text-indigo-300' }),
-                                            repo.name
-                                        ),
-                                        React.createElement('p', { className: 'text-sm mb-3 opacity-80 truncate', title: repo.path }, repo.path),
-                                        React.createElement('div', { className: 'text-xs opacity-70 flex items-center' },
-                                            React.createElement(Icon, { name: 'clock', className: 'mr-2' }),
-                                            'Last Modified: ',
-                                            new Date(repo.last_modified).toLocaleString()
-                                        )
-                                    ))
-                                )
-                            ),
-                    
-                    // Repository detail modal
-                    selectedRepo && React.createElement(
-                        React.Fragment,
-                        null,
-                        // Modal overlay
-                        React.createElement('div', { 
-                            className: 'fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40',
-                            onClick: () => setSelectedRepo(null)
-                        }),
-                        
-                        // Modal content
-                        React.createElement(
-                            'div',
-                            { 
-                                className: 'glass repo-detail p-6',
-                                onClick: (e) => e.stopPropagation()
-                            },
-                            // Header with close button
-                            React.createElement(
-                                'div',
-                                { className: 'repo-detail-header' },
-                                React.createElement(
-                                    'div',
-                                    { className: 'flex justify-between items-center' },
-                                    React.createElement('h2', { className: 'text-2xl font-bold' }, 
-                                        React.createElement(Icon, { name: 'folder-open', className: 'mr-3 text-indigo-300' }),
-                                        selectedRepo.name
-                                    ),
-                                    React.createElement(
-                                        'button',
-                                        { 
-                                            className: 'text-lg p-2 rounded-full hover:bg-white/10',
-                                            onClick: () => setSelectedRepo(null)
-                                        },
-                                        React.createElement(Icon, { name: 'times' })
-                                    )
-                                )
-                            ),
-                            
-                            // Repository details
-                            React.createElement(
-                                'div',
-                                { className: 'mt-4' },
-                                React.createElement(
-                                    'div',
-                                    { className: 'mb-4' },
-                                    React.createElement('h3', { className: 'text-lg font-semibold mb-2' }, 'Repository Path'),
-                                    React.createElement('p', { 
-                                        className: 'text-sm bg-black/20 p-3 rounded-lg break-all',
-                                        style: { 
-                                            wordBreak: 'break-all', 
-                                            hyphens: 'auto',
-                                            maxWidth: '100%',
-                                            fontSize: '0.875rem',
-                                            lineHeight: '1.25rem',
-                                            padding: '0.5rem'
-                                        }
-                                    }, selectedRepo.path)
-                                ),
-                                React.createElement(
-                                    'div',
-                                    { className: 'mb-4' },
-                                    React.createElement('h3', { className: 'text-lg font-semibold mb-2' }, 'Last Modified'),
-                                    React.createElement('p', { className: 'text-sm' }, new Date(selectedRepo.last_modified).toLocaleString())
-                                ),
-                                React.createElement(
-                                    'div',
-                                    { className: 'mt-6' },
-                                    React.createElement(
-                                        'button',
-                                        { 
-                                            className: 'bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center',
-                                            onClick: () => alert(`Would pull repository: ${selectedRepo.name}`)
-                                        },
-                                        React.createElement(Icon, { name: 'sync-alt', className: 'mr-2' }),
-                                        'Pull Latest Changes'
-                                    )
-                                )
-                            )
-                        )
-                    )
-                );
-            }
-            
-            // Render the app
-            const domContainer = document.getElementById('root');
-            const root = ReactDOM.createRoot(domContainer);
-            root.render(React.createElement(App));
-        })();
-    </script>
-    
-    <noscript>
-        <div class="p-8 text-center text-white">
-            <h1 class="text-3xl font-bold mb-4">Repository Scanner</h1>
-            <p class="text-lg">You need to enable JavaScript to run this app.</p>
-        </div>
-    </noscript>
-</body>
-</html>
-    </script>
-    
-    <noscript>
-        <div class="p-8 text-center text-white">
-            <h1 class="text-3xl font-bold mb-4">Repository Scanner</h1>
-            <p class="text-lg">You need to enable JavaScript to run this app.</p>
-        </div>
-    </noscript>
-</body>
-</html>
+        
+        .path-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+        
+        .path-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
             background: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 5px 10px;
