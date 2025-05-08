@@ -21,6 +21,25 @@
         return date.toLocaleDateString();
     }
 
+    // Component: ThemeToggleButton
+    function ThemeToggleButton({ theme, toggleTheme }) {
+        return e(
+            'button',
+            {
+                onClick: toggleTheme,
+                className: 'p-2 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white fixed top-4 right-4 z-50 glass-button', // Added glass-button for consistency
+                style: { 
+                    color: 'var(--color-text-primary)', // Use CSS var for icon color
+                    background: 'var(--color-glass-light-bg)' // Use CSS var for bg
+                },
+                'aria-label': `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`,
+                title: `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`
+            },
+            e(Icon, { name: theme === 'light' ? 'moon' : 'sun', className: 'h-6 w-6' })
+        );
+    }
+
+
     // Component: HeaderComponent
     function HeaderComponent() {
         return e(
@@ -108,10 +127,7 @@
             ),
             e(
                 'div',
-                { 
-                    className: 'absolute right-3 top-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity',
-                    onClick: (event) => event.stopPropagation() // Prevent card click when clicking button
-                },
+                { className: 'absolute right-3 top-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity' },
                 e(
                     'button',
                     {
@@ -313,6 +329,20 @@
         const [searchQuery, setSearchQuery] = React.useState('');
         const [sortBy, setSortBy] = React.useState('name');
         const [loadingStates, setLoadingStates] = React.useState({});
+        const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'dark');
+
+        React.useEffect(() => {
+            if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            } else {
+                document.body.classList.remove('light-theme');
+            }
+            localStorage.setItem('theme', theme);
+        }, [theme]);
+
+        const toggleTheme = () => {
+            setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+        };
 
         const filteredRepositories = React.useMemo(() => {
             return repositories.filter(repo => 
@@ -467,7 +497,8 @@
         
         return e(
             'div', 
-            { className: 'container mx-auto px-4 py-8' },
+            { className: 'container mx-auto px-4 py-8 relative' }, // Added relative for potential absolute positioning inside
+            e(ThemeToggleButton, { theme, toggleTheme }),
             e(HeaderComponent),
             e(ControlsBar, { 
                 searchQuery, setSearchQuery, sortBy, setSortBy, 
