@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      # Mount the user's home directory to access repositories
+      - ~/.:/home/user
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - SCAN_DIRECTORY=/home/user/code
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+# For future use with background tasks
+#  celery:
+#    build: .
+#    command: celery -A app.celery worker --loglevel=info
+#    volumes:
+#      - .:/app
+#    depends_on:
+#      - redis
+#      - app
+#    restart: unless-stopped

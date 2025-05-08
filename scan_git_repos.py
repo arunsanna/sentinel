@@ -78,13 +78,15 @@ def get_gitignore_matcher(directory):
     return None # No .gitignore or error parsing
 
 # --- Directory Scanning (Parallelized) ---
-def scan_directory(dir_path, config, current_depth=0, parent_gitignore_matcher=None):
+def scan_directory(dir_path: Path, config, current_depth=0, parent_gitignore_matcher=None):
     """
     Scans a single directory. Returns lists of git repos and non-git dirs found within.
     Handles depth limits, exclusions, and .gitignore.
     """
+    logger.info(f"Scanning directory: {dir_path} (depth: {current_depth})")
+    
     if current_depth > config["max_depth"]:
-        logger.debug(f"Max depth reached for {dir_path}")
+        logger.info(f"Max depth reached for {dir_path}")
         return [], []
 
     git_repos_found = []
@@ -93,19 +95,34 @@ def scan_directory(dir_path, config, current_depth=0, parent_gitignore_matcher=N
     # --- .gitignore Logic ---
     current_gitignore_matcher = get_gitignore_matcher(dir_path)
     def is_ignored(path_to_check):
+        # Make sure path_to_check is a Path object
+        path_obj = Path(path_to_check) if isinstance(path_to_check, str) else path_to_check
         # Check parent matcher first, then current directory's matcher
-        if parent_gitignore_matcher and parent_gitignore_matcher(path_to_check):
+        if parent_gitignore_matcher and parent_gitignore_matcher(str(path_obj)):
             return True
-        if current_gitignore_matcher and current_gitignore_matcher(path_to_check):
+        if current_gitignore_matcher and current_gitignore_matcher(str(path_obj)):
             return True
         # Check config exclusions (simple basename check)
-        if Path(path_to_check).name in config.get("excluded_dirs", []):
+        if path_obj.name in config.get("excluded_dirs", []):
              return True
         return False
 
     # --- Check Current Directory ---
     is_git_repo = (Path(dir_path) / ".git").is_dir()
-    is_top_level_scan = Path(dir_path).parent == Path(config["scan_directory"])
+    parent_scan_dir = Path(config["scan_directory"])
+    is_top_level_scan = dir_path.parent == parent_scan_dir
+
+    # Check if directory exists and is accessible
+    try:
+        if not dir_path.exists():
+            logger.warning(f"Directory does not exist: {dir_path}")
+            return [], []
+        if not dir_path.is_dir():
+            logger.warning(f"Not a directory: {dir_path}")
+            return [], []
+    except Exception as e:
+        logger.error(f"Error checking directory {dir_path}: {e}")
+        return [], []
 
     if is_git_repo:
         logger.debug(f"Found Git repository: {dir_path}")
@@ -122,23 +139,23 @@ def scan_directory(dir_path, config, current_depth=0, parent_gitignore_matcher=N
              logger.debug(f"Skipping high-level directory: {dir_path}")
 
 
+
     # --- Scan Subdirectories ---
     subdirs_to_scan = []
     try:
-        for entry in os.scandir(dir_path):
-            if entry.is_dir() and not entry.name.startswith('.'):
-                 # Check if the *subdirectory itself* should be ignored
-                if not is_ignored(entry.path):
-                    subdirs_to_scan.append(entry.path)
-                elif config.get("verbose", False):
-                    logger.info(f"Ignoring directory due to pattern: {entry.path}")
-
+        for item in dir_path.iterdir():
+            if item.is_dir():
+                # Check if this subdir should be ignored
+                if is_ignored(item):
+                    logger.debug(f"Ignoring directory due to exclusion or .gitignore: {item}")
+                    continue
+                subdirs_to_scan.append(item)
     except PermissionError:
         logger.warning(f"Permission denied accessing: {dir_path}")
         return git_repos_found, non_git_dirs_found # Return what we have so far
     except FileNotFoundError:
-         logger.warning(f"Directory not found (possibly removed during scan): {dir_path}")
-         return git_repos_found, non_git_dirs_found
+        logger.warning(f"Directory not found (possibly removed during scan): {dir_path}")
+        return git_repos_found, non_git_dirs_found
 
     # --- Parallel Subdirectory Scanning ---
     # Pass the combined matcher (parent + current) to children
@@ -156,7 +173,7 @@ def scan_directory(dir_path, config, current_depth=0, parent_gitignore_matcher=N
             try:
                 sub_git_repos, sub_non_git_dirs = future.result()
                 git_repos_found.extend(sub_git_repos)
-                # We only collect non_git_dirs at the top level, so ignore sub_non_git_dirs here
+                non_git_dirs_found.extend(sub_non_git_dirs)
             except Exception as exc:
                 logger.error(f"Subdirectory scan {subdir} generated an exception: {exc}")
 
@@ -235,6 +252,14 @@ def print_table(data, title):
 
 # --- Main Execution ---
 if __name__ == "__main__":
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Scan for git repositories in specified directories')
+    parser.add_argument('--force-scan', action='store_true',
+                      help='Force a fresh scan even if results exist')
+    args = parser.parse_args()
+    
     # Load configuration
     config = load_config()
 
@@ -256,8 +281,10 @@ if __name__ == "__main__":
     # --- Perform Scan ---
     # The initial call to scan_directory handles the parallel execution within it
     try:
+        # Convert the scan_directory string to a Path object
+        scan_dir_path = Path(config["scan_directory"])
         git_repos, non_git_repos = scan_directory(
-            config["scan_directory"],
+            scan_dir_path,
             config,
             current_depth=0,
             parent_gitignore_matcher=None # No parent matcher at the top level

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Scanner</title>
+    <!-- This will be used for development, React build files will replace this later -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Include Tailwind CSS via CDN for development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Placeholder for React app -->
+    <div id="root"></div>
+    <!-- Temporary script - will be replaced by proper React build -->
+    <script>
+      // Basic placeholder content
+      const domContainer = document.querySelector('#root');
+      const root = ReactDOM.createRoot(domContainer);
+      
+      // Simple component to show app is working
+      function App() {
+        const [repositories, setRepositories] = React.useState([]);
+        const [loading, setLoading] = React.useState(false);
+        const [scanPath, setScanPath] = React.useState("");
+        const [scanDepth, setScanDepth] = React.useState(10);
+        const [progress, setProgress] = React.useState(null);
+        const [eventSource, setEventSource] = React.useState(null);
+        const [pullProgress, setPullProgress] = React.useState({});
+        const [pullEventSources, setPullEventSources] = React.useState({});
+        
+        // Function to scan for repositories
+        const scanRepositories = async () => {
+          setLoading(true);
+          setRepositories([]);
+          try {
+            const path = encodeURIComponent(scanPath || '~/code');
+            const depth = scanDepth || 10;
+            
+            // Start the scan
+            const response = await fetch(`/api/scan?path=${path}&depth=${depth}`);
+            const data = await response.json();
+            
+            if (data.status === "started") {
+              // Connect to SSE stream for progress updates
+              connectToEventStream();
+            } else if (data.status === "already_scanning") {
+              alert("A scan is already in progress");
+              connectToEventStream();
+            } else if (data.git_repositories) {
+              setRepositories(data.git_repositories);
+              setLoading(false);
+            }
+          } catch (error) {
+            console.error("Error scanning repositories:", error);
+            setLoading(false);
+          }
+        };
+        
+        // Connect to Server-Sent Events for progress updates
+        const connectToEventStream = () => {
+          // Close existing connection if any
+          if (eventSource) {
+            eventSource.close();
+          }
+          
+          // Create new connection
+          const newEventSource = new EventSource('/api/scan/progress');
+          
+          newEventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.status === "completed") {
+              // Scan completed
+              setProgress(null);
+              setLoading(false);
+              setRepositories(data.result.git_repositories);
+              newEventSource.close();
+            } else if (data.status === "error") {
+              // Error occurred
+              setProgress({
+                ...data.progress,
+                error: data.message
+              });
+              setLoading(false);
+              newEventSource.close();
+            } else if (data.status === "progress" || data.status === "started" || data.status === "estimating") {
+              // Update progress
+              setProgress(data.progress);
+            }
+          };
+          
+          newEventSource.onerror = (error) => {
+            console.error("EventSource error:", error);
+            newEventSource.close();
+            setLoading(false);
+          };
+          
+          setEventSource(newEventSource);
+        };
+        
+        // Clean up event source on unmount
+        React.useEffect(() => {
+          return () => {
+            if (eventSource) {
+              eventSource.close();
+            }
+            
+            // Close all pull event sources
+            Object.values(pullEventSources).forEach(source => {
+              if (source) source.close();
+            });
+          };
+        }, [eventSource, pullEventSources]);
+        
+        // Get repositories on load
+        React.useEffect(() => {
+          const fetchRepositories = async () => {
+            try {
+              const response = await fetch('/api/repositories');
+              const data = await response.json();
+              setRepositories(data);
+            } catch (error) {
+              console.error("Error fetching repositories:", error);
+            }
+          };
+          
+          fetchRepositories();
+        }, []);
+        
+        // Function to pull a repository
+        const pullRepository = async (repoId) => {
+          try {
+            // Set initial progress state
+            setPullProgress(prev => ({
+              ...prev,
+              [repoId]: { status: "starting", message: "Starting pull..." }
+            }));
+            
+            const response = await fetch(`/api/repository/${repoId}/pull`, {
+              method: 'POST'
+            });
+            const data = await response.json();
+            
+            if (data.status === "started" || data.status === "already_pulling") {
+              // Connect to SSE stream for progress updates
+              connectToPullEventStream(repoId);
+            } else if (data.repository && data.pull_result) {
+              // Handle immediate response (no background process)
+              setRepositories(repos => 
+                repos.map(repo => 
+                  repo.id === repoId ? { ...repo, pull_status: data.pull_result.success ? "success" : "error" } : repo
+                )
+              );
+              
+              setPullProgress(prev => ({
+                ...prev,
+                [repoId]: { 
+                  status: data.pull_result.success ? "completed" : "error", 
+                  message: data.pull_result.message 
+                }
+              }));
+            }
+          } catch (error) {
+            console.error("Error pulling repository:", error);
+            setPullProgress(prev => ({
+              ...prev,
+              [repoId]: { status: "error", message: `Error: ${error.message}` }
+            }));
+          }
+        };
+        
+        // Connect to Server-Sent Events for pull progress updates
+        const connectToPullEventStream = (repoId) => {
+          // Close existing connection if any
+          if (pullEventSources[repoId]) {
+            pullEventSources[repoId].close();
+          }
+          
+          // Create new connection
+          const newEventSource = new EventSource(`/api/repository/${repoId}/pull/progress`);
+          
+          newEventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.status === "completed") {
+              // Pull completed
+              setPullProgress(prev => ({
+                ...prev,
+                [repoId]: { 
+                  status: "completed", 
+                  message: data.message || "Pull completed",
+                  logs: [...(prev[repoId]?.logs || []), { message: data.message, status: "success" }]
+                }
+              }));
+              
+              // Update repository status
+              if (data.result) {
+                setRepositories(repos => 
+                  repos.map(repo => 
+                    repo.id === repoId ? { ...repo, pull_status: data.result.success ? "success" : "error" } : repo
+                  )
+                );
+              }
+              
+              // Close the event source
+              newEventSource.close();
+              setPullEventSources(prev => {
+                const updated = {...prev};
+                delete updated[repoId];
+                return updated;
+              });
+            } else if (data.status === "error") {
+              // Error occurred
+              setPullProgress(prev => ({
+                ...prev,
+                [repoId]: { 
+                  status: "error", 
+                  message: data.message || "Error during pull",
+                  logs: [...(prev[repoId]?.logs || []), { message: data.message, status: "error" }]
+                }
+              }));
+              
+              // Update repository status
+              setRepositories(repos => 
+                repos.map(repo => 
+                  repo.id === repoId ? { ...repo, pull_status: "error" } : repo
+                )
+              );
+              
+              // Close the event source
+              newEventSource.close();
+              setPullEventSources(prev => {
+                const updated = {...prev};
+                delete updated[repoId];
+                return updated;
+              });
+            } else if (data.status === "progress" || data.status === "running") {
+              // Update progress
+              setPullProgress(prev => ({
+                ...prev,
+                [repoId]: { 
+                  status: "running", 
+                  message: data.update?.message || "Pulling...",
+                  logs: [...(prev[repoId]?.logs || []), { 
+                    message: data.update?.message || "Progress update", 
+                    status: "info",
+                    timestamp: new Date().toISOString()
+                  }]
+                }
+              }));
+            }
+          };
+          
+          newEventSource.onerror = (error) => {
+            console.error("Pull EventSource error:", error);
+            newEventSource.close();
+            
+            setPullEventSources(prev => {
+              const updated = {...prev};
+              delete updated[repoId];
+              return updated;
+            });
+          };
+          
+          // Save the event source
+          setPullEventSources(prev => ({
+            ...prev,
+            [repoId]: newEventSource
+          }));
+        };
+        
+        return React.createElement(
+          'div', 
+          { className: 'container mx-auto p-4' },
+          React.createElement('h1', { className: 'text-2xl font-bold mb-4' }, 'Repository Scanner'),
+          
+          // Scan form
+          React.createElement(
+            'div', 
+            { className: 'mb-6 p-4 border rounded bg-gray-50' },
+            React.createElement('h2', { className: 'text-xl mb-2' }, 'Scan for Repositories'),
+            React.createElement(
+              'div',
+              { className: 'flex flex-wrap gap-4 mb-4' },
+              React.createElement(
+                'div',
+                { className: 'flex-1' },
+                React.createElement('label', { className: 'block mb-1' }, 'Directory Path:'),
+                React.createElement('input', { 
+                  type: 'text', 
+                  className: 'w-full p-2 border rounded', 
+                  value: scanPath,
+                  placeholder: '~/code',
+                  onChange: (e) => setScanPath(e.target.value)
+                })
+              ),
+              React.createElement(
+                'div',
+                { className: 'w-24' },
+                React.createElement('label', { className: 'block mb-1' }, 'Max Depth:'),
+                React.createElement('input', { 
+                  type: 'number', 
+                  className: 'w-full p-2 border rounded', 
+                  value: scanDepth,
+                  min: 1,
+                  max: 20,
+                  onChange: (e) => setScanDepth(parseInt(e.target.value))
+                })
+              )
+            ),
+            React.createElement(
+              'button',
+              { 
+                className: 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300',
+                onClick: scanRepositories,
+                disabled: loading || progress?.is_scanning
+              },
+              loading || progress?.is_scanning ? 'Scanning...' : 'Scan Repositories'
+            )
+          ),
+          
+          // Progress indicator
+          progress && progress.is_scanning && React.createElement(
+            'div', 
+            { className: 'mb-6 p-4 border rounded bg-blue-50' },
+            React.createElement('h3', { className: 'font-semibold mb-2' }, 'Scan Progress'),
+            React.createElement('p', { className: 'mb-2 text-sm text-gray-700' }, 
+              progress.message || `Scanning ${progress.scan_path}`
+            ),
+            React.createElement(
+              'div', 
+              { className: 'w-full bg-gray-200 rounded-full h-2.5 mb-4' },
+              React.createElement(
+                'div',
+                { 
+                  className: 'bg-blue-600 h-2.5 rounded-full',
+                  style: { 
+                    width: progress.total_dirs > 0 ? 
+                      `${Math.min(100, Math.round((progress.processed_dirs / progress.total_dirs) * 100))}%` : 
+                      '50%'
+                  }
+                }
+              )
+            ),
+            React.createElement('div', { className: 'flex justify-between text-xs text-gray-500' },
+              React.createElement('span', null, `Processed: ${progress.processed_dirs} ${progress.total_dirs > 0 ? `of ~${progress.total_dirs}` : ''}`),
+              React.createElement('span', null, `Git Repos Found: ${progress.git_repos_found}`)
+            )
+          ),
+          
+          // Progress error message
+          progress && progress.error && React.createElement(
+            'div',
+            { className: 'mb-6 p-4 border rounded bg-red-50 text-red-700' },
+            React.createElement('h3', { className: 'font-semibold mb-2' }, 'Scan Error'),
+            React.createElement('p', null, progress.error)
+          ),
+          
+          // Repository list
+          React.createElement(
+            'div',
+            { className: 'bg-white shadow overflow-hidden sm:rounded-lg' },
+            React.createElement('h2', { className: 'text-xl p-4 bg-gray-100' }, 'Repositories'),
+            repositories.length === 0 
+              ? React.createElement('p', { className: 'p-4 text-gray-500' }, 'No repositories found. Try scanning for repositories.')
+              : React.createElement(
+                  'table',
+                  { className: 'min-w-full divide-y divide-gray-200' },
+                  React.createElement(
+                    'thead',
+                    { className: 'bg-gray-50' },
+                    React.createElement(
+                      'tr',
+                      null,
+                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Name'),
+                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Path'),
+                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Last Modified'),
+                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
+                    )
+                  ),
+                  React.createElement(
+                    'tbody',
+                    { className: 'bg-white divide-y divide-gray-200' },
+                    repositories.map(repo => React.createElement(
+                      'tr',
+                      { key: repo.path },
+                      React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap' }, repo.name),
+                      React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, repo.path),
+                      React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, repo.last_modified),
+                      React.createElement(
+                        'td', 
+                        { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' },
+                        React.createElement(
+                          'button',
+                          { 
+                            className: `px-2 py-1 ${pullProgress[repo.id]?.status === 'running' ? 
+                              'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white rounded text-xs`,
+                            onClick: () => pullRepository(repo.id),
+                            disabled: pullProgress[repo.id]?.status === 'running'
+                          },
+                          pullProgress[repo.id]?.status === 'running' ? 'Pulling...' : 'Pull'
+                        ),
+                        repo.pull_status && React.createElement(
+                          'span',
+                          { 
+                            className: `ml-2 px-2 py-1 text-xs rounded ${
+                              repo.pull_status === 'success' ? 'bg-green-100 text-green-800' : 
+                              repo.pull_status === 'error' ? 'bg-red-100 text-red-800' : 
+                              'bg-yellow-100 text-yellow-800'
+                            }`
+                          },
+                          repo.pull_status
+                        ),
+                        
+                        // Show pull progress message if available
+                        pullProgress[repo.id] && React.createElement(
+                          'div',
+                          { className: 'mt-2 text-xs' },
+                          React.createElement(
+                            'span',
+                            { 
+                              className: `inline-block px-2 py-1 rounded ${
+                                pullProgress[repo.id].status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                pullProgress[repo.id].status === 'error' ? 'bg-red-100 text-red-800' : 
+                                pullProgress[repo.id].status === 'running' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`
+                            },
+                            pullProgress[repo.id].message
+                          ),
+                          
+                          // Logs toggle button
+                          pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
+                            'button',
+                            {
+                              className: 'ml-2 text-blue-500 hover:text-blue-700',
+                              onClick: (e) => {
+                                e.stopPropagation();
+                                const logsElement = document.getElementById(`logs-${repo.id}`);
+                                if (logsElement) {
+                                  logsElement.classList.toggle('hidden');
+                                }
+                              }
+                            },
+                            'Toggle Logs'
+                          ),
+                          
+                          // Logs panel
+                          pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
+                            'div',
+                            {
+                              id: `logs-${repo.id}`,
+                              className: 'mt-2 p-2 bg-gray-50 border rounded text-xs max-h-48 overflow-y-auto hidden'
+                            },
+                            pullProgress[repo.id].logs.map((log, index) => React.createElement(
+                              'div',
+                              {
+                                key: index,
+                                className: `py-1 ${
+                                  log.status === 'error' ? 'text-red-600' : 
+                                  log.status === 'success' ? 'text-green-600' : 
+                                  'text-gray-700'
+                                }`
+                              },
+                              log.message
+                            ))
+                          )
+                        )
+                      )
+                    ))
+                  )
+                )
+          )
+        );
+      }
+      
+      root.render(React.createElement(App));
+    </script>
+</head>
+<body>
+    <!-- React will replace this content -->
+    <!-- This is just a fallback in case JavaScript is disabled -->
+    <noscript>
+        <div style="padding: 20px; text-align: center;">
+            <h1>Repository Scanner</h1>
+            <p>You need to enable JavaScript to run this app.</p>
+        </div>
+    </noscript>
+</body>
+</html>
