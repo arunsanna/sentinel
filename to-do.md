@@ -75,11 +75,11 @@
 ### UI Improvements
 - [x] Add loading indicators for async operations
   > **Prompt**: "Implement skeleton loaders, spinners, and progress bars for all asynchronous operations to improve perceived performance."
-- [ ] Implement toast notifications for operation results
+- [x] Implement toast notifications for operation results
   > **Prompt**: "Create a notification system that shows success, warning, and error messages for user actions."
 - [ ] Create detailed repository view
   > **Prompt**: "Build a detailed view page for each repository showing commit history, branches, and file structure."
-- [ ] Add dark/light theme toggle
+- [x] Add dark/light theme toggle
   > **Prompt**: "Implement a theme system with Tailwind that respects user preferences and allows manual switching."
 
 ### Data Persistence

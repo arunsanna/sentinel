@@ -11,6 +11,21 @@ A web-based application for scanning, monitoring, and managing Git repositories 
 - Configure scan depth and exclusions
 - Real-time scan progress indicators using Server-Sent Events
 - Live pull progress and logs with detailed operation information
+- Modern, responsive glassmorphic UI with dark mode support
+- Mobile-friendly design with optimized card views
+
+## UI Features
+
+The application features a modern, responsive glassmorphic design with the following UI features:
+
+- **Glassmorphic Interface**: Frosted glass effect with depth and transparency
+- **Dark/Light Mode**: Toggle between dark and light themes for comfortable viewing
+- **Responsive Design**: Optimized for all device sizes with tailored mobile views
+- **Progress Tracking**: Real-time visual feedback for scanning and pull operations
+- **Animated Elements**: Smooth transitions and loading animations
+- **Icon Integration**: Font Awesome icons for improved visual cues and usability
+- **Card-Based Mobile View**: Optimized mobile experience with expandable cards
+- **Interactive Logs**: Collapsible log panels for detailed operation information
 
 ## Getting Started
 

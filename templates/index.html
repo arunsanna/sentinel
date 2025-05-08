@@ -9,6 +9,141 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <!-- Include Tailwind CSS via CDN for development -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #334155;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            color: #e2e8f0;
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-light {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-button {
+            background: rgba(37, 99, 235, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-button:hover {
+            background: rgba(37, 99, 235, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-button:disabled {
+            background: rgba(156, 163, 175, 0.5);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .glass-input {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-input:focus {
+            outline: none;
+            border: 1px solid rgba(59, 130, 246, 0.8);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        
+        .shimmer {
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.6) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.7);
+        }
+        
+        /* Smooth transitions */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
     <!-- Placeholder for React app -->
     <div id="root"></div>
     <!-- Temporary script - will be replaced by proper React build -->
@@ -16,6 +151,24 @@
       // Basic placeholder content
       const domContainer = document.querySelector('#root');
       const root = ReactDOM.createRoot(domContainer);
+      
+      // Icon component helper
+      const Icon = ({ name, className }) => React.createElement('i', { className: `fas fa-${name} ${className || ''}` });
+      
+      // Card component to encapsulate the glassmorphic effect
+      const GlassCard = ({ title, children, className, icon, darkMode }) => {
+        return React.createElement(
+          'div',
+          { className: `${darkMode ? 'glass-dark' : 'glass'} p-6 mb-6 ${className || ''}` },
+          React.createElement(
+            'div',
+            { className: 'flex items-center mb-4' },
+            icon && React.createElement(Icon, { name: icon, className: 'mr-3 text-indigo-400' }),
+            React.createElement('h2', { className: 'text-xl font-semibold' }, title)
+          ),
+          children
+        );
+      };
       
       // Simple component to show app is working
       function App() {
@@ -27,6 +180,14 @@
         const [eventSource, setEventSource] = React.useState(null);
         const [pullProgress, setPullProgress] = React.useState({});
         const [pullEventSources, setPullEventSources] = React.useState({});
+        const [expandedRepo, setExpandedRepo] = React.useState(null);
+        const [darkMode, setDarkMode] = React.useState(false);
+        const [menuOpen, setMenuOpen] = React.useState(false);
+        
+        // Toggle dark mode
+        const toggleDarkMode = () => {
+          setDarkMode(!darkMode);
+        };
         
         // Function to scan for repositories
         const scanRepositories = async () => {
@@ -271,205 +432,504 @@
         
         return React.createElement(
           'div', 
-          { className: 'container mx-auto p-4' },
-          React.createElement('h1', { className: 'text-2xl font-bold mb-4' }, 'Repository Scanner'),
+          { className: `min-h-screen pb-10 ${darkMode ? 'text-gray-100' : 'text-gray-800'}` },
           
-          // Scan form
+          // Header
           React.createElement(
-            'div', 
-            { className: 'mb-6 p-4 border rounded bg-gray-50' },
-            React.createElement('h2', { className: 'text-xl mb-2' }, 'Scan for Repositories'),
+            'header',
+            { className: 'sticky top-0 z-50 mb-8 py-4 px-6 backdrop-blur bg-opacity-60 bg-gradient-to-r from-indigo-500/30 to-purple-500/30 border-b border-white/10 shadow-lg' },
             React.createElement(
               'div',
-              { className: 'flex flex-wrap gap-4 mb-4' },
+              { className: 'container mx-auto flex justify-between items-center' },
               React.createElement(
                 'div',
-                { className: 'flex-1' },
-                React.createElement('label', { className: 'block mb-1' }, 'Directory Path:'),
-                React.createElement('input', { 
-                  type: 'text', 
-                  className: 'w-full p-2 border rounded', 
-                  value: scanPath,
-                  placeholder: '~/code',
-                  onChange: (e) => setScanPath(e.target.value)
-                })
+                { className: 'flex items-center space-x-3' },
+                React.createElement(Icon, { name: 'code-branch', className: 'text-2xl text-indigo-300' }),
+                React.createElement('h1', { className: 'text-2xl font-bold tracking-tight' }, 'Repository Scanner')
               ),
               React.createElement(
                 'div',
-                { className: 'w-24' },
-                React.createElement('label', { className: 'block mb-1' }, 'Max Depth:'),
-                React.createElement('input', { 
-                  type: 'number', 
-                  className: 'w-full p-2 border rounded', 
-                  value: scanDepth,
-                  min: 1,
-                  max: 20,
-                  onChange: (e) => setScanDepth(parseInt(e.target.value))
-                })
+                { className: 'flex space-x-4 items-center' },
+                React.createElement(
+                  'button',
+                  {
+                    className: 'p-2 rounded-full transition-colors ' + (darkMode ? 'bg-gray-800/50 text-yellow-300' : 'bg-white/30 text-gray-700'),
+                    onClick: toggleDarkMode,
+                    title: darkMode ? 'Switch to light mode' : 'Switch to dark mode'
+                  },
+                  React.createElement(Icon, { name: darkMode ? 'sun' : 'moon' })
+                ),
+                React.createElement(
+                  'button',
+                  {
+                    className: 'lg:hidden p-2 rounded-full transition-colors ' + (darkMode ? 'bg-gray-800/50' : 'bg-white/30'),
+                    onClick: () => setMenuOpen(!menuOpen),
+                    'aria-expanded': menuOpen
+                  },
+                  React.createElement(Icon, { name: menuOpen ? 'times' : 'bars' })
+                )
               )
-            ),
-            React.createElement(
-              'button',
-              { 
-                className: 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300',
-                onClick: scanRepositories,
-                disabled: loading || progress?.is_scanning
-              },
-              loading || progress?.is_scanning ? 'Scanning...' : 'Scan Repositories'
             )
           ),
           
-          // Progress indicator
-          progress && progress.is_scanning && React.createElement(
-            'div', 
-            { className: 'mb-6 p-4 border rounded bg-blue-50' },
-            React.createElement('h3', { className: 'font-semibold mb-2' }, 'Scan Progress'),
-            React.createElement('p', { className: 'mb-2 text-sm text-gray-700' }, 
-              progress.message || `Scanning ${progress.scan_path}`
-            ),
+          // Main content
+          React.createElement(
+            'main',
+            { className: 'container mx-auto px-4 fade-in' },
+          
+            // Scan form
             React.createElement(
-              'div', 
-              { className: 'w-full bg-gray-200 rounded-full h-2.5 mb-4' },
+              GlassCard,
+              { 
+                title: 'Scan for Repositories', 
+                icon: 'search',
+                darkMode: darkMode,
+                className: 'transform transition-all hover:shadow-xl'
+              },
               React.createElement(
                 'div',
+                { className: 'flex flex-wrap lg:flex-nowrap gap-4 mb-4' },
+                React.createElement(
+                  'div',
+                  { className: 'w-full' },
+                  React.createElement(
+                    'label', 
+                    { className: 'block mb-2 font-medium text-sm' }, 
+                    React.createElement(Icon, { name: 'folder-open', className: 'mr-2 text-indigo-400' }),
+                    'Directory Path:'
+                  ),
+                  React.createElement('input', { 
+                    type: 'text', 
+                    className: 'glass-input w-full', 
+                    value: scanPath,
+                    placeholder: '~/code',
+                    onChange: (e) => setScanPath(e.target.value)
+                  })
+                ),
+                React.createElement(
+                  'div',
+                  { className: 'w-full lg:w-32' },
+                  React.createElement(
+                    'label', 
+                    { className: 'block mb-2 font-medium text-sm' }, 
+                    React.createElement(Icon, { name: 'level-down-alt', className: 'mr-2 text-indigo-400' }),
+                    'Max Depth:'
+                  ),
+                  React.createElement('input', { 
+                    type: 'number', 
+                    className: 'glass-input w-full', 
+                    value: scanDepth,
+                    min: 1,
+                    max: 20,
+                    onChange: (e) => setScanDepth(parseInt(e.target.value))
+                  })
+                )
+              ),
+              React.createElement(
+                'button',
                 { 
-                  className: 'bg-blue-600 h-2.5 rounded-full',
-                  style: { 
-                    width: progress.total_dirs > 0 ? 
-                      `${Math.min(100, Math.round((progress.processed_dirs / progress.total_dirs) * 100))}%` : 
-                      '50%'
-                  }
-                }
+                  className: 'glass-button px-6 py-3 text-white flex items-center justify-center w-full lg:w-auto',
+                  onClick: scanRepositories,
+                  disabled: loading || progress?.is_scanning
+                },
+                loading || progress?.is_scanning ? 
+                  React.createElement(React.Fragment, null,
+                    React.createElement('span', { className: 'animate-spin mr-2' }, React.createElement(Icon, { name: 'spinner' })),
+                    'Scanning...'
+                  ) : 
+                  React.createElement(React.Fragment, null,
+                    React.createElement(Icon, { name: 'search', className: 'mr-2' }),
+                    'Scan Repositories'
+                  )
               )
             ),
-            React.createElement('div', { className: 'flex justify-between text-xs text-gray-500' },
-              React.createElement('span', null, `Processed: ${progress.processed_dirs} ${progress.total_dirs > 0 ? `of ~${progress.total_dirs}` : ''}`),
-              React.createElement('span', null, `Git Repos Found: ${progress.git_repos_found}`)
-            )
-          ),
           
-          // Progress error message
-          progress && progress.error && React.createElement(
-            'div',
-            { className: 'mb-6 p-4 border rounded bg-red-50 text-red-700' },
-            React.createElement('h3', { className: 'font-semibold mb-2' }, 'Scan Error'),
-            React.createElement('p', null, progress.error)
-          ),
+            // Progress indicator
+            progress && progress.is_scanning && React.createElement(
+              GlassCard,
+              { 
+                title: 'Scan Progress', 
+                icon: 'tasks',
+                darkMode: darkMode,
+                className: 'fade-in'
+              },
+              React.createElement('p', { className: 'mb-3 text-sm' }, 
+                React.createElement(Icon, { name: 'info-circle', className: 'mr-2 text-blue-400' }),
+                progress.message || `Scanning ${progress.scan_path}`
+              ),
+              React.createElement(
+                'div', 
+                { className: 'w-full bg-black/10 rounded-full h-3 mb-4 overflow-hidden' },
+                React.createElement(
+                  'div',
+                  { 
+                    className: 'h-full rounded-full shimmer flex items-center justify-end pr-2 text-xs font-bold',
+                    style: { 
+                      width: progress.total_dirs > 0 ? 
+                        `${Math.min(100, Math.round((progress.processed_dirs / progress.total_dirs) * 100))}%` : 
+                        '60%',
+                      background: 'linear-gradient(to right, rgba(79, 70, 229, 0.6) 0%, rgba(129, 140, 248, 0.6) 100%)'
+                    }
+                  },
+                  progress.total_dirs > 0 ? 
+                    `${Math.min(100, Math.round((progress.processed_dirs / progress.total_dirs) * 100))}%` : ''
+                )
+              ),
+              React.createElement('div', { className: 'flex justify-between text-xs opacity-80' },
+                React.createElement('span', { className: 'flex items-center' }, 
+                  React.createElement(Icon, { name: 'folder-open', className: 'mr-2' }),
+                  `Processed: ${progress.processed_dirs} ${progress.total_dirs > 0 ? `of ~${progress.total_dirs}` : ''}`
+                ),
+                React.createElement('span', { className: 'flex items-center' }, 
+                  React.createElement(Icon, { name: 'code-branch', className: 'mr-2' }),
+                  `Git Repos Found: ${progress.git_repos_found}`
+                )
+              )
+            ),
+            
+            // Progress error message
+            progress && progress.error && React.createElement(
+              GlassCard,
+              { 
+                title: 'Scan Error', 
+                icon: 'exclamation-triangle',
+                darkMode: darkMode,
+                className: 'border-red-300/50 text-red-600'
+              },
+              React.createElement('p', { className: 'flex items-start' },
+                React.createElement(Icon, { name: 'times-circle', className: 'mr-2 mt-1 text-red-500' }),
+                progress.error
+              )
+            ),
           
-          // Repository list
-          React.createElement(
-            'div',
-            { className: 'bg-white shadow overflow-hidden sm:rounded-lg' },
-            React.createElement('h2', { className: 'text-xl p-4 bg-gray-100' }, 'Repositories'),
-            repositories.length === 0 
-              ? React.createElement('p', { className: 'p-4 text-gray-500' }, 'No repositories found. Try scanning for repositories.')
-              : React.createElement(
-                  'table',
-                  { className: 'min-w-full divide-y divide-gray-200' },
-                  React.createElement(
-                    'thead',
-                    { className: 'bg-gray-50' },
+            // Repository list
+            React.createElement(
+              GlassCard,
+              { 
+                title: `Repositories (${repositories.length})`, 
+                icon: 'code-branch',
+                darkMode: darkMode,
+                className: 'overflow-hidden'
+              },
+              
+              // Repository Content
+              repositories.length === 0 
+                ? React.createElement('div', { className: 'py-8 text-center opacity-70' }, 
+                    React.createElement(Icon, { name: 'folder-open', className: 'text-4xl mb-3 text-indigo-400' }),
+                    React.createElement('p', null, 'No repositories found. Try scanning for repositories.')
+                  )
+                : React.createElement(React.Fragment, null,
+                    // Desktop view - Table
                     React.createElement(
-                      'tr',
-                      null,
-                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Name'),
-                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Path'),
-                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Last Modified'),
-                      React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
-                    )
-                  ),
-                  React.createElement(
-                    'tbody',
-                    { className: 'bg-white divide-y divide-gray-200' },
-                    repositories.map(repo => React.createElement(
-                      'tr',
-                      { key: repo.path },
-                      React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap' }, repo.name),
-                      React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, repo.path),
-                      React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, repo.last_modified),
+                      'div',
+                      { className: 'hidden lg:block overflow-x-auto' },
                       React.createElement(
-                        'td', 
-                        { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' },
+                        'table',
+                        { className: 'min-w-full divide-y divide-gray-200/30' },
                         React.createElement(
-                          'button',
-                          { 
-                            className: `px-2 py-1 ${pullProgress[repo.id]?.status === 'running' ? 
-                              'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white rounded text-xs`,
-                            onClick: () => pullRepository(repo.id),
-                            disabled: pullProgress[repo.id]?.status === 'running'
-                          },
-                          pullProgress[repo.id]?.status === 'running' ? 'Pulling...' : 'Pull'
-                        ),
-                        repo.pull_status && React.createElement(
-                          'span',
-                          { 
-                            className: `ml-2 px-2 py-1 text-xs rounded ${
-                              repo.pull_status === 'success' ? 'bg-green-100 text-green-800' : 
-                              repo.pull_status === 'error' ? 'bg-red-100 text-red-800' : 
-                              'bg-yellow-100 text-yellow-800'
-                            }`
-                          },
-                          repo.pull_status
-                        ),
-                        
-                        // Show pull progress message if available
-                        pullProgress[repo.id] && React.createElement(
-                          'div',
-                          { className: 'mt-2 text-xs' },
+                          'thead',
+                          { className: 'text-xs uppercase tracking-wider opacity-70' },
                           React.createElement(
-                            'span',
-                            { 
-                              className: `inline-block px-2 py-1 rounded ${
-                                pullProgress[repo.id].status === 'completed' ? 'bg-green-100 text-green-800' : 
-                                pullProgress[repo.id].status === 'error' ? 'bg-red-100 text-red-800' : 
-                                pullProgress[repo.id].status === 'running' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`
-                            },
-                            pullProgress[repo.id].message
-                          ),
-                          
-                          // Logs toggle button
-                          pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
-                            'button',
-                            {
-                              className: 'ml-2 text-blue-500 hover:text-blue-700',
-                              onClick: (e) => {
-                                e.stopPropagation();
-                                const logsElement = document.getElementById(`logs-${repo.id}`);
-                                if (logsElement) {
-                                  logsElement.classList.toggle('hidden');
-                                }
-                              }
-                            },
-                            'Toggle Logs'
-                          ),
-                          
-                          // Logs panel
-                          pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
-                            'div',
-                            {
-                              id: `logs-${repo.id}`,
-                              className: 'mt-2 p-2 bg-gray-50 border rounded text-xs max-h-48 overflow-y-auto hidden'
-                            },
-                            pullProgress[repo.id].logs.map((log, index) => React.createElement(
-                              'div',
-                              {
-                                key: index,
-                                className: `py-1 ${
-                                  log.status === 'error' ? 'text-red-600' : 
-                                  log.status === 'success' ? 'text-green-600' : 
-                                  'text-gray-700'
-                                }`
-                              },
-                              log.message
-                            ))
+                            'tr',
+                            null,
+                            React.createElement('th', { className: 'px-6 py-3 text-left' }, 
+                              React.createElement('div', { className: 'flex items-center' },
+                                React.createElement(Icon, { name: 'folder', className: 'mr-2' }),
+                                'Name'
+                              )
+                            ),
+                            React.createElement('th', { className: 'px-6 py-3 text-left' }, 
+                              React.createElement('div', { className: 'flex items-center' },
+                                React.createElement(Icon, { name: 'sitemap', className: 'mr-2' }),
+                                'Path'
+                              )
+                            ),
+                            React.createElement('th', { className: 'px-6 py-3 text-left' }, 
+                              React.createElement('div', { className: 'flex items-center' },
+                                React.createElement(Icon, { name: 'clock', className: 'mr-2' }),
+                                'Last Modified'
+                              )
+                            ),
+                            React.createElement('th', { className: 'px-6 py-3 text-left' }, 
+                              React.createElement('div', { className: 'flex items-center' },
+                                React.createElement(Icon, { name: 'cogs', className: 'mr-2' }),
+                                'Actions'
+                              )
+                            )
                           )
+                        ),
+                        React.createElement(
+                          'tbody',
+                          { className: 'divide-y divide-gray-200/30' },
+                          repositories.map(repo => React.createElement(
+                            'tr',
+                            { 
+                              key: repo.path,
+                              className: 'hover:bg-white/10 transition-colors'
+                            },
+                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap font-medium' }, repo.name),
+                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm opacity-80' }, repo.path),
+                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm opacity-80' }, 
+                              React.createElement('div', { className: 'flex items-center' },
+                                React.createElement(Icon, { name: 'history', className: 'mr-2 text-indigo-400' }),
+                                new Date(repo.last_modified).toLocaleString()
+                              )
+                            ),
+                            React.createElement(
+                              'td', 
+                              { className: 'px-6 py-4 whitespace-nowrap text-sm' },
+                              React.createElement(
+                                'button',
+                                { 
+                                  className: `glass-button px-4 py-2 text-white flex items-center text-xs
+                                    ${pullProgress[repo.id]?.status === 'running' ? 'bg-gray-500/60 cursor-not-allowed' : ''}`,
+                                  onClick: () => pullRepository(repo.id),
+                                  disabled: pullProgress[repo.id]?.status === 'running'
+                                },
+                                pullProgress[repo.id]?.status === 'running' ? 
+                                  React.createElement(React.Fragment, null,
+                                    React.createElement('span', { className: 'animate-spin mr-2' }, React.createElement(Icon, { name: 'spinner' })),
+                                    'Pulling...'
+                                  ) : 
+                                  React.createElement(React.Fragment, null,
+                                    React.createElement(Icon, { name: 'sync-alt', className: 'mr-2' }),
+                                    'Pull'
+                                  )
+                              ),
+                              
+                              // Status badge
+                              repo.pull_status && React.createElement(
+                                'span',
+                                { 
+                                  className: `ml-2 px-2 py-1 rounded-full text-xs inline-flex items-center ${
+                                    repo.pull_status === 'success' ? 'bg-green-400/20 text-green-500 border border-green-400/30' : 
+                                    repo.pull_status === 'error' ? 'bg-red-400/20 text-red-500 border border-red-400/30' : 
+                                    'bg-yellow-400/20 text-yellow-600 border border-yellow-400/30'
+                                  }`
+                                },
+                                React.createElement(Icon, { 
+                                  name: repo.pull_status === 'success' ? 'check-circle' : 
+                                        repo.pull_status === 'error' ? 'times-circle' : 'exclamation-circle',
+                                  className: 'mr-1' 
+                                }),
+                                repo.pull_status
+                              ),
+                              
+                              // Pull progress
+                              pullProgress[repo.id] && React.createElement(
+                                'div',
+                                { className: 'mt-2 text-xs flex flex-col gap-1' },
+                                React.createElement(
+                                  'span',
+                                  { 
+                                    className: `px-2 py-1 rounded glass-light inline-flex items-center ${
+                                      pullProgress[repo.id].status === 'completed' ? 'text-green-600' : 
+                                      pullProgress[repo.id].status === 'error' ? 'text-red-600' : 
+                                      pullProgress[repo.id].status === 'running' ? 'text-blue-600' :
+                                      'text-gray-600'
+                                    }`
+                                  },
+                                  React.createElement(Icon, { 
+                                    name: pullProgress[repo.id].status === 'completed' ? 'check' : 
+                                          pullProgress[repo.id].status === 'error' ? 'times' : 
+                                          pullProgress[repo.id].status === 'running' ? 'spinner' : 'info',
+                                    className: `mr-1 ${pullProgress[repo.id].status === 'running' ? 'animate-spin' : ''}`
+                                  }),
+                                  pullProgress[repo.id].message
+                                ),
+                                
+                                // Logs toggle button
+                                pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
+                                  'button',
+                                  {
+                                    className: 'text-indigo-400 hover:text-indigo-500 underline text-left flex items-center',
+                                    onClick: (e) => {
+                                      e.stopPropagation();
+                                      const logsElement = document.getElementById(`logs-${repo.id}`);
+                                      if (logsElement) {
+                                        logsElement.classList.toggle('hidden');
+                                      }
+                                    }
+                                  },
+                                  React.createElement(Icon, { name: 'terminal', className: 'mr-1' }),
+                                  'Toggle Logs'
+                                ),
+                                
+                                // Logs panel
+                                pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
+                                  'div',
+                                  {
+                                    id: `logs-${repo.id}`,
+                                    className: 'mt-2 p-2 glass-light dark:glass-dark rounded text-xs max-h-48 overflow-y-auto hidden'
+                                  },
+                                  pullProgress[repo.id].logs.map((log, index) => React.createElement(
+                                    'div',
+                                    {
+                                      key: index,
+                                      className: `py-1 ${
+                                        log.status === 'error' ? 'text-red-500' : 
+                                        log.status === 'success' ? 'text-green-500' : 
+                                        'opacity-80'
+                                      }`
+                                    },
+                                    React.createElement(Icon, { 
+                                      name: log.status === 'error' ? 'exclamation-triangle' : 
+                                            log.status === 'success' ? 'check' : 'arrow-right',
+                                      className: 'mr-1'
+                                    }),
+                                    log.message
+                                  ))
+                                )
+                              )
+                            )
+                          ))
                         )
                       )
-                    ))
+                    ),
+                    
+                    // Mobile view - Cards
+                    React.createElement(
+                      'div',
+                      { className: 'lg:hidden space-y-6 mt-4' },
+                      repositories.map(repo => React.createElement(
+                        'div',
+                        { 
+                          key: repo.path,
+                          className: 'glass-light p-4 rounded-lg'
+                        },
+                        // Repository header
+                        React.createElement(
+                          'div',
+                          { className: 'flex justify-between items-start mb-3' },
+                          React.createElement(
+                            'div',
+                            null,
+                            React.createElement('h3', { className: 'font-medium text-base' }, 
+                              React.createElement(Icon, { name: 'folder', className: 'mr-2 text-indigo-400' }),
+                              repo.name
+                            ),
+                            React.createElement('p', { className: 'text-sm opacity-70 mt-1 truncate' }, repo.path)
+                          ),
+                          React.createElement(
+                            'button',
+                            { 
+                              className: `glass-button px-3 py-1 text-white text-xs flex items-center
+                                ${pullProgress[repo.id]?.status === 'running' ? 'bg-gray-500/60 cursor-not-allowed' : ''}`,
+                              onClick: () => pullRepository(repo.id),
+                              disabled: pullProgress[repo.id]?.status === 'running'
+                            },
+                            pullProgress[repo.id]?.status === 'running' ? 
+                              React.createElement(React.Fragment, null,
+                                React.createElement('span', { className: 'animate-spin mr-1' }, React.createElement(Icon, { name: 'spinner' })),
+                                'Pulling'
+                              ) : 
+                              React.createElement(React.Fragment, null,
+                                React.createElement(Icon, { name: 'sync-alt', className: 'mr-1' }),
+                                'Pull'
+                              )
+                          )
+                        ),
+                        
+                        // Repository details
+                        React.createElement(
+                          'div',
+                          { className: 'text-sm' },
+                          React.createElement('div', { className: 'flex items-center mb-2 opacity-70' },
+                            React.createElement(Icon, { name: 'clock', className: 'mr-2 text-indigo-400' }),
+                            'Last Modified: ',
+                            React.createElement('span', { className: 'ml-1' }, new Date(repo.last_modified).toLocaleString())
+                          ),
+                          
+                          // Status badge
+                          repo.pull_status && React.createElement(
+                            'div',
+                            { className: 'mb-2 flex items-center' },
+                            'Status: ',
+                            React.createElement(
+                              'span',
+                              { 
+                                className: `ml-2 px-2 py-1 rounded-full text-xs inline-flex items-center ${
+                                  repo.pull_status === 'success' ? 'bg-green-400/20 text-green-500 border border-green-400/30' : 
+                                  repo.pull_status === 'error' ? 'bg-red-400/20 text-red-500 border border-red-400/30' : 
+                                  'bg-yellow-400/20 text-yellow-600 border border-yellow-400/30'
+                                }`
+                              },
+                              React.createElement(Icon, { 
+                                name: repo.pull_status === 'success' ? 'check-circle' : 
+                                      repo.pull_status === 'error' ? 'times-circle' : 'exclamation-circle',
+                                className: 'mr-1' 
+                              }),
+                              repo.pull_status
+                            )
+                          ),
+                          
+                          // Pull progress for mobile
+                          pullProgress[repo.id] && React.createElement(
+                            'div',
+                            { className: 'mt-3 space-y-2 border-t border-gray-200/30 pt-3' },
+                            React.createElement(
+                              'div',
+                              { 
+                                className: `px-2 py-1 rounded glass-light inline-flex items-center ${
+                                  pullProgress[repo.id].status === 'completed' ? 'text-green-600' : 
+                                  pullProgress[repo.id].status === 'error' ? 'text-red-600' : 
+                                  pullProgress[repo.id].status === 'running' ? 'text-blue-600' :
+                                  'text-gray-600'
+                                }`
+                              },
+                              React.createElement(Icon, { 
+                                name: pullProgress[repo.id].status === 'completed' ? 'check' : 
+                                      pullProgress[repo.id].status === 'error' ? 'times' : 
+                                      pullProgress[repo.id].status === 'running' ? 'spinner' : 'info',
+                                className: `mr-1 ${pullProgress[repo.id].status === 'running' ? 'animate-spin' : ''}`
+                              }),
+                              pullProgress[repo.id].message
+                            ),
+                            
+                            // Mobile logs toggle button
+                            pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
+                              'button',
+                              {
+                                className: 'text-indigo-400 hover:text-indigo-500 underline flex items-center',
+                                onClick: () => setExpandedRepo(expandedRepo === repo.id ? null : repo.id)
+                              },
+                              React.createElement(Icon, { 
+                                name: expandedRepo === repo.id ? 'chevron-up' : 'chevron-down', 
+                                className: 'mr-1' 
+                              }),
+                              expandedRepo === repo.id ? 'Hide Logs' : 'Show Logs'
+                            ),
+                            
+                            // Mobile logs panel
+                            expandedRepo === repo.id && pullProgress[repo.id].logs && pullProgress[repo.id].logs.length > 0 && React.createElement(
+                              'div',
+                              {
+                                className: 'mt-2 p-2 glass-dark rounded text-xs max-h-48 overflow-y-auto'
+                              },
+                              pullProgress[repo.id].logs.map((log, index) => React.createElement(
+                                'div',
+                                {
+                                  key: index,
+                                  className: `py-1 ${
+                                    log.status === 'error' ? 'text-red-500' : 
+                                    log.status === 'success' ? 'text-green-500' : 
+                                    'opacity-80'
+                                  }`
+                                },
+                                React.createElement(Icon, { 
+                                  name: log.status === 'error' ? 'exclamation-triangle' : 
+                                        log.status === 'success' ? 'check' : 'arrow-right',
+                                  className: 'mr-1'
+                                }),
+                                log.message
+                              ))
+                            )
+                          )
+                        )
+                      ))
+                    )
                   )
-                )
+            )
           )
         );
       }
@@ -477,13 +937,13 @@
       root.render(React.createElement(App));
     </script>
 </head>
-<body>
+<body class="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600">
     <!-- React will replace this content -->
     <!-- This is just a fallback in case JavaScript is disabled -->
     <noscript>
-        <div style="padding: 20px; text-align: center;">
-            <h1>Repository Scanner</h1>
-            <p>You need to enable JavaScript to run this app.</p>
+        <div class="p-8 text-center text-white">
+            <h1 class="text-3xl font-bold mb-4">Repository Scanner</h1>
+            <p class="text-lg">You need to enable JavaScript to run this app.</p>
         </div>
     </noscript>
 </body>
