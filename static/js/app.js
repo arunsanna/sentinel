@@ -63,27 +63,12 @@
         scanPathInput, setScanPathInput,
         scanDepthInput, setScanDepthInput,
         handleStartScan,
-        isScanning
+        isScanning,
+        onBrowseDirectories // New prop
     }) {
-        const handleBrowseClick = async () => {
-            if (typeof window.showDirectoryPicker !== 'function') {
-                alert('Your browser does not support the File System Access API for directory picking. Please type the path manually.');
-                return;
-            }
-            try {
-                const directoryHandle = await window.showDirectoryPicker();
-                // The directoryHandle.name gives the name of the selected folder.
-                // This will set the input field to just the folder's name.
-                // The user needs to ensure the full path is correct for the backend.
-                setScanPathInput(directoryHandle.name); 
-            } catch (err) {
-                if (err.name === 'AbortError') {
-                    console.log('User cancelled the directory picker.');
-                } else {
-                    console.error('Error picking directory:', err);
-                    alert(`Error picking directory: ${err.message}`);
-                }
-            }
+
+        const handleBrowseClick = () => { // Renamed from previous version
+            onBrowseDirectories(); // Call prop to open modal
         };
         
         // Hide controls if initial loading or no repos and not currently scanning
@@ -100,14 +85,14 @@
                             e('input', {
                                 type: 'text',
                                 id: 'scanPath',
-                                placeholder: 'Enter path or browse (folder name)', // Updated placeholder
+                                placeholder: 'Enter path or browse', // Updated placeholder
                                 className: 'glass-input flex-grow', 
                                 value: scanPathInput,
                                 onChange: (e) => setScanPathInput(e.target.value),
                                 disabled: isScanning
                             }),
                             e('button', {
-                                onClick: handleBrowseClick, // Updated to use showDirectoryPicker
+                                onClick: handleBrowseClick, // Uses new handler
                                 className: `glass-button px-3 py-2 flex-shrink-0 ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`,
                                 disabled: isScanning,
                                 title: 'Browse for folder'
@@ -152,14 +137,14 @@
                         e('input', {
                             type: 'text',
                             id: 'scanPath',
-                            placeholder: 'Enter path or browse (folder name)', // Updated placeholder
+                            placeholder: 'Enter path or browse', // Updated placeholder
                             className: 'glass-input flex-grow',
                             value: scanPathInput,
                             onChange: (e) => setScanPathInput(e.target.value),
                             disabled: isScanning
                         }),
                         e('button', {
-                            onClick: handleBrowseClick, // Updated to use showDirectoryPicker
+                            onClick: handleBrowseClick, // Uses new handler
                             className: `glass-button px-3 py-2 flex-shrink-0 ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`,
                             disabled: isScanning,
                             title: 'Browse for folder'
@@ -584,6 +569,131 @@
         );
     }
     
+    // Component: DirectoryBrowserModal (New)
+    function DirectoryBrowserModal({ isOpen, onClose, onSelectPath }) {
+        const [currentPath, setCurrentPath] = React.useState(null); // null for base paths, or a string path
+        const [items, setItems] = React.useState([]);
+        const [parentPath, setParentPath] = React.useState(null);
+        const [isLoading, setIsLoading] = React.useState(false);
+        const [error, setError] = React.useState(null);
+
+        const fetchDirectoryContents = async (path) => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const url = path ? `/api/browse_directories?path=${encodeURIComponent(path)}` : '/api/browse_directories';
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error || `Failed to load directory: ${response.statusText}`);
+                }
+                const data = await response.json();
+                setItems(data.items || []);
+                setCurrentPath(data.current_path);
+                setParentPath(data.parent_path);
+            } catch (err) {
+                console.error("Error fetching directory contents:", err);
+                setError(err.message);
+                setItems([]); // Clear items on error
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        React.useEffect(() => {
+            if (isOpen) {
+                fetchDirectoryContents(null); // Fetch base paths when modal opens
+            } else {
+                // Reset state when modal closes
+                setCurrentPath(null);
+                setItems([]);
+                setParentPath(null);
+                setError(null);
+            }
+        }, [isOpen]);
+
+        const handleItemClick = (item) => {
+            if (item.type === 'directory') {
+                fetchDirectoryContents(item.path);
+            }
+        };
+
+        const handleSelectCurrentPath = () => {
+            if (currentPath && currentPath !== "/") { // Don't select the virtual root
+                onSelectPath(currentPath);
+                onClose();
+            } else if (items.length > 0 && currentPath === "/") {
+                // If at root and user wants to select one of the base paths shown
+                // This case might need a specific item selection rather than "current path"
+                // For now, we assume selection happens on a non-virtual-root path
+                setError("Please navigate into a directory to select it, or select a specific base path if listed.");
+            }
+        };
+        
+        const handleNavigateUp = () => {
+            if (parentPath) {
+                 // If parentPath is "/", fetch base paths, otherwise fetch the parentPath
+                fetchDirectoryContents(parentPath === "/" ? null : parentPath);
+            }
+        };
+
+
+        if (!isOpen) {
+            return null;
+        }
+
+        return e(
+            'div', { className: 'repo-modal-overlay' }, // Reuse overlay style
+            e(
+                'div', { className: 'repo-detail glass-dark w-full max-w-2xl', onClick: e => e.stopPropagation() }, // Reuse modal style
+                e('div', { className: 'p-4 border-b border-white/10 flex justify-between items-center' },
+                    e('h3', { className: 'text-xl font-semibold' }, 'Browse Server Directories'),
+                    e('button', { onClick: onClose, className: 'p-1 rounded-full hover:bg-white/10' }, e(Icon, { name: 'times', className: 'h-5 w-5' }))
+                ),
+                e('div', { className: 'p-4 repo-detail-body', style: { minHeight: '300px', maxHeight: '60vh' } }, // Ensure scrollability
+                    e('div', { className: 'mb-3 flex items-center justify-between gap-2' },
+                        e('button', 
+                            { 
+                                onClick: handleNavigateUp, 
+                                disabled: isLoading || !parentPath,
+                                className: `glass-button px-3 py-1 text-sm ${!parentPath || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`
+                            }, 
+                            e(Icon, { name: 'arrow-up', className: 'mr-1' }), 'Up'
+                        ),
+                        e('span', { className: 'text-sm truncate text-gray-300 flex-grow text-center', title: currentPath || 'Base Directories' }, 
+                            e(Icon, { name: 'folder', className: 'mr-2 text-teal-400 flex-shrink-0'}),
+                            currentPath || 'Base Directories'
+                        ),
+                        e('button', 
+                            { 
+                                onClick: handleSelectCurrentPath, 
+                                disabled: isLoading || !currentPath || currentPath === "/",
+                                className: `glass-button px-3 py-1 text-sm ${!currentPath || currentPath === "/" || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`
+                            }, 
+                            'Select Current Path'
+                        )
+                    ),
+                    isLoading && e('div', { className: 'flex justify-center items-center h-32' }, e(Icon, { name: 'spinner', className: 'animate-spin h-8 w-8 text-teal-400' })),
+                    error && e('p', { className: 'log-error p-2 rounded' }, error),
+                    !isLoading && !error && items.length === 0 && e('p', { className: 'text-center text-gray-400 py-4' }, 'No items found or directory is empty.'),
+                    !isLoading && !error && items.length > 0 && e(
+                        'ul', { className: 'space-y-1' },
+                        items.map(item => e(
+                            'li', 
+                            { 
+                                key: item.path, 
+                                onClick: () => handleItemClick(item),
+                                className: `p-2 rounded-md flex items-center gap-2 ${item.type === 'directory' ? 'cursor-pointer hover:bg-white/5' : 'opacity-60'} transition-colors duration-150`
+                            },
+                            e(Icon, { name: item.type === 'directory' ? 'folder' : 'file-alt', className: `flex-shrink-0 ${item.type === 'directory' ? 'text-teal-400' : 'text-gray-500'}` }),
+                            e('span', { className: 'truncate' }, item.name)
+                        ))
+                    )
+                )
+            )
+        );
+    }
+
     // Main App component
     function App() {
         const [repositories, setRepositories] = React.useState([]);
@@ -612,6 +722,8 @@
         const [scanProgressMessages, setScanProgressMessages] = React.useState([]);
         const [scanError, setScanError] = React.useState(null);
         const [scanEventSource, setScanEventSource] = React.useState(null);
+        // New state for Directory Browser Modal
+        const [isBrowserModalOpen, setIsBrowserModalOpen] = React.useState(false);
 
 
         React.useEffect(() => {
@@ -909,17 +1021,28 @@
             e(ControlsBar, { 
                 searchQuery, setSearchQuery, 
                 sortBy, setSortBy, 
-                loading: loading && !isScanning, // Pass loading state for initial list
+                loading: loading && !isScanning, 
                 repositoriesCount: repositories.length,
-                scanPathInput, setScanPathInput,      // Pass scan state
-                scanDepthInput, setScanDepthInput,    // Pass scan state
-                handleStartScan,                      // Pass scan handler
-                isScanning                            // Pass scan status
+                scanPathInput, setScanPathInput,      
+                scanDepthInput, setScanDepthInput,    
+                handleStartScan,                      
+                isScanning,
+                onBrowseDirectories: () => setIsBrowserModalOpen(true) // Open modal from ControlsBar
             }),
             // Display Scan Status
             e(ScanStatusDisplay, { isScanning, scanProgressMessages, scanError }),
 
-            loading && !isScanning ? e(LoadingSkeleton) : // Show skeleton if loading initial list and not manually scanning
+            // Directory Browser Modal
+            e(DirectoryBrowserModal, {
+                isOpen: isBrowserModalOpen,
+                onClose: () => setIsBrowserModalOpen(false),
+                onSelectPath: (selectedPath) => {
+                    setScanPathInput(selectedPath); // Update the scan path input in App's state
+                    setIsBrowserModalOpen(false);
+                }
+            }),
+
+            loading && !isScanning ? e(LoadingSkeleton) : 
             !isScanning && repositories.length === 0 && !scanError ? e(EmptyState) : // Show empty state if not scanning, no repos, no scan error
             e(
                 'div', // Main content area for repository list

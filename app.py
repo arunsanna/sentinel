@@ -63,6 +63,83 @@ def simplified():
     return render_template('simplified.html')
 
 # API Routes
+@app.route('/api/browse_directories', methods=['GET'])
+def browse_directories():
+    requested_path_str = request.args.get('path', None)
+    items = []
+    parent_path = None
+    current_path_for_response = None
+
+    try:
+        if not requested_path_str:
+            # List configured base paths
+            base_paths = config_manager.get_browseable_base_paths()
+            current_path_for_response = "/" # Virtual root for base paths
+            for p_str in base_paths:
+                p = Path(p_str)
+                if p.exists() and p.is_dir():
+                    items.append({"name": p.name, "path": str(p.resolve()), "type": "directory"})
+                else:
+                    logger.warning(f"Configured browseable_base_path does not exist or is not a directory: {p_str}")
+        else:
+            # Validate if the requested path is within allowed bases
+            if not config_manager.is_path_within_browseable_bases(requested_path_str):
+                logger.warning(f"Attempt to browse outside of allowed base paths: {requested_path_str}")
+                return jsonify({"error": "Access denied: Path is outside of browseable areas."}), 403
+
+            current_path = Path(requested_path_str).resolve()
+            current_path_for_response = str(current_path)
+
+            if not current_path.exists() or not current_path.is_dir():
+                return jsonify({"error": "Path not found or is not a directory."}), 404
+
+            # Determine parent path, ensuring it doesn't go "above" a base path
+            # This logic for parent_path needs to be careful not to allow escaping the browseable roots.
+            # If current_path is one of the base_paths, parent should be our virtual root "/"
+            # Otherwise, it's current_path.parent
+            
+            is_base_path = False
+            for bp_str in config_manager.get_browseable_base_paths():
+                if current_path == Path(bp_str).resolve():
+                    is_base_path = True
+                    break
+            
+            if is_base_path:
+                parent_path = "/" # Virtual root
+            else:
+                # Ensure parent is still within browseable area
+                potential_parent = current_path.parent
+                if config_manager.is_path_within_browseable_bases(str(potential_parent)):
+                    parent_path = str(potential_parent)
+                else: # Should not happen if initial validation is correct, but as a safeguard
+                    parent_path = "/" 
+
+
+            for item_name in os.listdir(current_path):
+                item_path = current_path / item_name
+                item_type = "directory" if item_path.is_dir() else "file"
+                # Optionally hide hidden files/folders, or specific types
+                # if item_name.startswith('.'):
+                #     continue
+                items.append({"name": item_name, "path": str(item_path.resolve()), "type": item_type})
+        
+        # Sort items: directories first, then files, then alphabetically
+        items.sort(key=lambda x: (x['type'] != 'directory', x['name'].lower()))
+
+        return jsonify({
+            "current_path": current_path_for_response,
+            "parent_path": parent_path,
+            "items": items
+        })
+
+    except PermissionError:
+        logger.error(f"Permission denied while trying to browse path: {requested_path_str}")
+        return jsonify({"error": "Permission denied to access this path on the server."}), 500
+    except Exception as e:
+        logger.error(f"Error browsing directories for path '{requested_path_str}': {e}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+
 @app.route('/api/scan/progress', methods=['GET'])
 def scan_progress_stream():
     """Stream scan progress updates using Server-Sent Events"""
