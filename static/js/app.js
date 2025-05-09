@@ -364,49 +364,57 @@
         discardError,
         discardRepoChanges 
     }) {
-        const [showDiscardConfirmationMessage, setShowDiscardConfirmationMessage] = React.useState(false); // New state for custom confirm
+        const [showDiscardConfirmationMessage, setShowDiscardConfirmationMessage] = React.useState(false);
 
         if (!selectedRepo) {
             return null;
         }
 
         const handleDiscardClick = () => {
-            setShowDiscardConfirmationMessage(true); // Show custom confirmation UI
+            setShowDiscardConfirmationMessage(true); 
         };
 
         const handleConfirmDiscard = () => {
             discardRepoChanges(selectedRepo.id);
-            setShowDiscardConfirmationMessage(false); // Hide custom confirmation UI
+            setShowDiscardConfirmationMessage(false); 
         };
 
         const handleCancelDiscard = () => {
-            setShowDiscardConfirmationMessage(false); // Hide custom confirmation UI
+            setShowDiscardConfirmationMessage(false); 
         };
+
+        // Determine the primary remote URL to display
+        // This assumes selectedRepo.remotes is an array of objects, 
+        // each with at least a 'fetch_url' property.
+        let primaryRemoteUrl = null;
+        if (selectedRepo && selectedRepo.remotes && selectedRepo.remotes.length > 0 && selectedRepo.remotes[0].fetch_url) {
+            primaryRemoteUrl = selectedRepo.remotes[0].fetch_url;
+        }
 
         return e(
             React.Fragment,
             null,
             e('div', { 
-                className: 'fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 repo-modal-overlay', // Added repo-modal-overlay
+                className: 'fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 repo-modal-overlay', 
                 onClick: closeRepoDetails
             }),
             e(
                 'div',
                 { 
-                    className: 'glass repo-detail p-6', // Base padding, specific sections can override
+                    className: 'glass repo-detail p-6', 
                     onClick: (event) => event.stopPropagation() 
                 },
                 e(
                     'div', // Header
-                    { className: 'repo-detail-header flex justify-between items-center pb-4 border-b border-white/10' }, // Added styling
+                    { className: 'repo-detail-header flex justify-between items-center pb-4 border-b border-white/10' }, 
                     e('h2', { className: 'text-2xl font-bold flex items-center' }, 
-                        e(Icon, { name: 'folder-open', className: 'mr-3 text-teal-400' }), // Updated color
+                        e(Icon, { name: 'folder-open', className: 'mr-3 text-teal-400' }), 
                         selectedRepo.name
                     ),
                     e(
                         'button',
                         { 
-                            className: 'text-lg p-2 rounded-full hover:bg-white/10 text-gray-300 hover:text-white', // Styling for close button
+                            className: 'text-lg p-2 rounded-full hover:bg-white/10 text-gray-300 hover:text-white', 
                             onClick: closeRepoDetails,
                             'aria-label': 'Close modal'
                         },
@@ -415,25 +423,65 @@
                 ),
                 e(
                     'div', // Body
-                    { className: 'repo-detail-body mt-4' }, // Added class, padding handled by this class or its children
-                    e(
-                        'div',
-                        { className: 'mb-4' },
-                        e('h3', { className: 'text-lg font-semibold mb-2' }, 'Repository Path'),
-                        e('p', { 
-                            className: 'text-sm bg-black/20 p-3 rounded-lg break-all',
-                            style: { wordBreak: 'break-all', hyphens: 'auto' } // Simplified style
-                        }, selectedRepo.path)
+                    { className: 'repo-detail-body mt-4' }, 
+                    // Grid for Path, Remote URL, Branch, Status, Last Modified
+                    e('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6' },
+                        e(
+                            'div',
+                            null,
+                            e('h3', { className: 'text-lg font-semibold mb-1 flex items-center' }, 
+                                e(Icon, {name: 'map-marker-alt', className: 'mr-2 text-teal-400'}), 
+                                'Path'
+                            ),
+                            e('p', { 
+                                className: 'text-sm break-all text-gray-300', 
+                                title: selectedRepo.path 
+                            }, selectedRepo.path)
+                        ),
+                        // Display Remote URL
+                        e(
+                            'div',
+                            null,
+                            e('h3', { className: 'text-lg font-semibold mb-1 flex items-center' }, 
+                                e(Icon, {name: 'cloud', className: 'mr-2 text-teal-400'}), 
+                                'Remote URL'
+                            ),
+                            e('p', { 
+                                className: 'text-sm break-all text-gray-300', 
+                                title: primaryRemoteUrl || 'N/A' 
+                            }, primaryRemoteUrl || '' // Display empty string if null/undefined, or 'N/A'
+                            )
+                        ),
+                        e(
+                            'div',
+                            null,
+                            e('h3', { className: 'text-lg font-semibold mb-1 flex items-center' }, 
+                                e(Icon, {name: 'code-branch', className: 'mr-2 text-teal-400'}), 
+                                'Current Branch'
+                            ),
+                            e('p', { className: 'text-sm text-gray-300' }, selectedRepo.current_branch || 'N/A')
+                        ),
+                        e(
+                            'div',
+                            null,
+                            e('h3', { className: 'text-lg font-semibold mb-1 flex items-center' }, 
+                                e(Icon, {name: 'info-circle', className: 'mr-2 text-teal-400'}), 
+                                'Status'
+                            ),
+                            e('p', { className: 'text-sm text-gray-300' }, selectedRepo.status || 'N/A')
+                        ),
+                        e(
+                            'div',
+                            null,
+                            e('h3', { className: 'text-lg font-semibold mb-1 flex items-center' }, 
+                                e(Icon, {name: 'calendar-alt', className: 'mr-2 text-teal-400'}), 
+                                'Last Modified'
+                            ),
+                            e('p', { className: 'text-sm text-gray-300' }, new Date(selectedRepo.last_modified).toLocaleString())
+                        )
                     ),
-                    e(
-                        'div',
-                        { className: 'mb-4' },
-                        e('h3', { className: 'text-lg font-semibold mb-2' }, 'Last Modified'),
-                        e('p', { className: 'text-sm' }, new Date(selectedRepo.last_modified).toLocaleString())
-                    ),
-                    e(
-                        'div',
-                        { className: 'mt-6 mb-4 flex flex-wrap gap-3' }, // Added flex-wrap and gap
+                    // Action Buttons
+                    e('div', { className: 'flex flex-col sm:flex-row gap-4' },
                         e(
                             'button',
                             {
