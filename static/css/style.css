@@ -1,94 +1,103 @@
 :root {
-    /* Default to dark theme variables */
-    --color-background-primary: #0f172a; /* slate-900 */
-    --color-background-secondary: #1e293b; /* slate-800 */
-    --color-text-primary: #f1f5f9; /* slate-100 */
-    --color-text-secondary: #94a3b8; /* slate-400 */
-    --color-accent: #14b8a6; /* teal-500 */
-    --color-accent-hover: #0d9488; /* teal-600 */
-    --color-accent-focus: #2dd4bf; /* teal-400 */ /* Adjusted for better visibility */
-    --color-accent-focus-shadow: rgba(45, 212, 191, 0.3);
-    --color-accent-subtle-bg: rgba(20, 184, 166, 0.15); /* teal-500 with low opacity */
-    --color-accent-subtle-text: #5eead4; /* lighter teal for text on subtle bg */
-
-    --color-glass-bg: rgba(30, 41, 59, 0.6); /* slate-800 with opacity for dark theme */
-    --color-glass-border: rgba(255, 255, 255, 0.1);
-    --color-glass-shadow: rgba(0, 0, 0, 0.3);
-
-    --color-glass-light-bg: rgba(51, 65, 85, 0.6); /* slate-700 with opacity for dark theme */
-    --color-glass-light-border: rgba(255, 255, 255, 0.12);
-    --color-glass-light-shadow: rgba(0, 0, 0, 0.25);
+    /* Warm Graphite & Amber - Dark Theme Variables (Deeper Backgrounds) */
+    --color-background-primary: #0D0D0E; /* Near Black (Very Dark Warm Gray) */
+    --color-background-secondary: #1A1A1C; /* Slightly Lighter Near Black */
+    --color-text-primary: #EAEAEA; /* Light Gray (High Contrast) */
+    --color-text-secondary: #B0B0B0; /* Medium Gray (Good Contrast) */
     
-    --color-glass-dark-bg: rgba(15, 23, 42, 0.65); /* slate-900 with opacity for dark theme */
-    --color-glass-dark-border: rgba(255, 255, 255, 0.08);
-    --color-glass-dark-shadow: rgba(0, 0, 0, 0.35);
+    --color-accent: #F59E0B; /* Amber (WCAG AA friendly for UI elements, check for text) */
+    --color-accent-hover: #D97706; /* Darker Amber */
+    --color-accent-focus: #FBBF24; /* Lighter Amber */
+    --color-accent-focus-shadow: rgba(245, 158, 11, 0.3);
+    --color-accent-subtle-bg: rgba(245, 158, 11, 0.1);
+    --color-accent-subtle-text: #FCD34D; /* Lighter amber for text on subtle bg */
+
+    --color-glass-bg: rgba(26, 26, 28, 0.65); /* Darker Warm Gray with opacity */
+    --color-glass-border: rgba(176, 176, 176, 0.15); /* Adjusted border for darker glass */
+    --color-glass-shadow: rgba(0, 0, 0, 0.4); /* Slightly increased shadow for depth */
+
+    --color-glass-light-bg: rgba(38, 38, 40, 0.65); /* Darker "Light" Warm Gray */
+    --color-glass-light-border: rgba(176, 176, 176, 0.2);
+    --color-glass-light-shadow: rgba(0, 0, 0, 0.35);
+    
+    --color-glass-dark-bg: rgba(18, 18, 20, 0.7); /* Very Dark Warm Gray (Near Black Glass) */
+    --color-glass-dark-border: rgba(176, 176, 176, 0.1);
+    --color-glass-dark-shadow: rgba(0, 0, 0, 0.45);
 
     --color-button-bg: var(--color-accent);
-    --color-button-text: #ffffff;
+    --color-button-text: #101011; /* Very Dark Gray for high contrast on amber button */
     --color-button-hover-bg: var(--color-accent-hover);
 
-    --color-input-bg: rgba(255, 255, 255, 0.05);
-    --color-input-border: rgba(255, 255, 255, 0.1);
+    --color-input-bg: rgba(176, 176, 176, 0.05); /* Slightly less opaque input bg */
+    --color-input-border: rgba(176, 176, 176, 0.15); /* Slightly less opaque input border */
     --color-input-text: var(--color-text-primary);
     --color-input-focus-border: var(--color-accent-focus);
     --color-input-focus-shadow: var(--color-accent-focus-shadow);
 
-    --color-log-container-bg: rgba(17, 24, 39, 0.85); /* Near black, semi-transparent */
-    --color-log-info: #60a5fa; /* blue-400 */
-    --color-log-success: #4ade80; /* green-400 */
-    --color-log-error: #f87171; /* red-400 */
+    --color-log-container-bg: rgba(18, 18, 20, 0.9);  /* Darker Log Container */
+    --color-log-info: #60A5FA; /* Accessible Blue (from Tailwind blue-400) */
+    --color-log-success: #4ADE80; /* Accessible Green (from Tailwind green-400) */
+    --color-log-error: #F87171; /* Accessible Red (from Tailwind red-400) */
     
-    --color-scrollbar-track: rgba(255, 255, 255, 0.05);
-    --color-scrollbar-thumb: rgba(255, 255, 255, 0.2);
-    --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+    --color-scrollbar-track: rgba(176, 176, 176, 0.05);
+    --color-scrollbar-thumb: rgba(176, 176, 176, 0.25);
+    --color-scrollbar-thumb-hover: rgba(176, 176, 176, 0.35);
 
-    --color-path-tooltip-bg: rgba(17, 24, 39, 0.95);
-    --color-shimmer-gradient: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.2) 60%, rgba(255, 255, 255, 0));
+    --color-path-tooltip-bg: rgba(18, 18, 20, 0.95); /* Darker Path Tooltip */
+    --color-shimmer-gradient: linear-gradient(90deg, rgba(176, 176, 176, 0) 0, rgba(176, 176, 176, 0.1) 20%, rgba(176, 176, 176, 0.2) 60%, rgba(176, 176, 176, 0));
     --color-text-on-glass-shadow: rgba(0, 0, 0, 0.5);
     --color-focus-outline: var(--color-accent-focus);
 
-    --color-green-badge-bg: #10b981; /* emerald-500 */
-    --color-green-badge-text: #ffffff;
+    --color-green-badge-bg: #38A169; /* Accessible Green for "New" badge */
+    --color-green-badge-text: #FFFFFF; /* White text on green badge */
 }
 
 body.light-theme {
-    --color-background-primary: #f8fafc; /* slate-50 */
-    --color-background-secondary: #f1f5f9; /* slate-100 */
-    --color-text-primary: #0f172a; /* slate-900 */
-    --color-text-secondary: #475569; /* slate-600 */
-    --color-accent: #0d9488; /* teal-600 */
-    --color-accent-hover: #0f766e; /* teal-700 */
-    --color-accent-focus: #14b8a6; /* teal-500 */
-    --color-accent-focus-shadow: rgba(20, 184, 166, 0.3);
-    --color-accent-subtle-bg: rgba(20, 184, 166, 0.1);
-    --color-accent-subtle-text: #0f766e; /* teal-700 */
+    /* Accessible Clear Sky - Light Theme Variables */
+    --color-background-primary: #F7FAFC; /* Very Light Gray (almost white) */
+    --color-background-secondary: #FFFFFF; /* White */
+    --color-text-primary: #1A202C; /* Very Dark Gray (High Contrast) */
+    --color-text-secondary: #4A5568; /* Dark Gray (Good Contrast) */
+    
+    --color-accent: #2B6CB0; /* Muted Blue (WCAG AA friendly on light bg) */
+    --color-accent-hover: #2C5282; /* Darker Muted Blue */
+    --color-accent-focus: #3182CE; /* Brighter Muted Blue */
+    --color-accent-focus-shadow: rgba(43, 108, 176, 0.3);
+    --color-accent-subtle-bg: rgba(43, 108, 176, 0.1);
+    --color-accent-subtle-text: #2C5282; /* Darker Muted Blue for text on subtle bg */
 
-    --color-glass-bg: rgba(255, 255, 255, 0.7); 
-    --color-glass-border: rgba(0, 0, 0, 0.08);
-    --color-glass-shadow: rgba(0, 0, 0, 0.1);
+    --color-glass-bg: rgba(255, 255, 255, 0.75); 
+    --color-glass-border: rgba(26, 32, 44, 0.15); /* Dark Gray border */
+    --color-glass-shadow: rgba(0, 0, 0, 0.08);
 
-    --color-glass-light-bg: rgba(248, 250, 252, 0.75); /* slate-50 with opacity */
-    --color-glass-light-border: rgba(0, 0, 0, 0.07);
+    --color-glass-light-bg: rgba(247, 250, 252, 0.8); 
+    --color-glass-light-border: rgba(26, 32, 44, 0.1);
     --color-glass-light-shadow: rgba(0, 0, 0, 0.05);
     
-    --color-glass-dark-bg: rgba(226, 232, 240, 0.6); /* slate-200 with opacity */
-    --color-glass-dark-border: rgba(0, 0, 0, 0.1);
+    --color-glass-dark-bg: rgba(237, 242, 247, 0.7); /* Light Gray glass */
+    --color-glass-dark-border: rgba(26, 32, 44, 0.15);
     --color-glass-dark-shadow: rgba(0, 0, 0, 0.1);
 
-    --color-input-bg: #ffffff;
-    --color-input-border: #cbd5e1; /* slate-300 */
-    --color-input-text: var(--color-text-primary);
+    --color-button-bg: var(--color-accent);
+    --color-button-text: #FFFFFF; /* White text on blue button */
+    --color-button-hover-bg: var(--color-accent-hover);
 
-    --color-log-container-bg: rgba(241, 245, 249, 0.85); /* slate-100, semi-transparent */
-    --color-log-info: #2563eb; /* blue-600 */
-    --color-log-success: #16a34a; /* green-600 */
-    --color-log-error: #dc2626; /* red-600 */
+    --color-input-bg: #FFFFFF;
+    --color-input-border: #CBD5E0; /* Light Gray border */
+    --color-input-text: var(--color-text-primary);
+    --color-input-focus-border: var(--color-accent-focus);
+    --color-input-focus-shadow: var(--color-accent-focus-shadow);
+
+    --color-log-container-bg: rgba(247, 250, 252, 0.9); 
+    --color-log-info: #3182CE; /* Accessible Blue */
+    --color-log-success: #38A169; /* Accessible Green */
+    --color-log-error: #E53E3E; /* Accessible Red */
     
-    --color-scrollbar-track: rgba(0, 0, 0, 0.03);
+    --color-scrollbar-track: rgba(0, 0, 0, 0.04);
     --color-scrollbar-thumb: rgba(0, 0, 0, 0.2);
     --color-scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
 
-    --color-path-tooltip-bg: rgba(15, 23, 42, 0.95); /* slate-900 for contrast */
+    --color-path-tooltip-bg: rgba(26, 32, 44, 0.95); /* Dark tooltip for contrast */
     --color-shimmer-gradient: linear-gradient(90deg, rgba(0,0,0,0) 0, rgba(0,0,0,0.03) 20%, rgba(0,0,0,0.06) 60%, rgba(0,0,0,0));
 }
 
