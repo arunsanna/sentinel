@@ -35,9 +35,75 @@ class GitOperations:
             # Get remotes
             remotes = []
             for remote in repo.remotes:
+                fetch_url = ""
+                push_url = ""
+
+                # --- Start Diagnostic Logging ---
+                logger.info(f"Diag: Processing remote '{remote.name}' in repo {repo_path}")
+                try:
+                    logger.info(f"Diag: remote.url attribute: {remote.url if hasattr(remote, 'url') else 'N/A'}")
+                except Exception as e:
+                    logger.info(f"Diag: Error accessing remote.url attribute: {e}")
+                
+                try:
+                    logger.info(f"Diag: remote.urls list: {list(remote.urls) if hasattr(remote, 'urls') else 'N/A'}")
+                except Exception as e:
+                    logger.info(f"Diag: Error accessing remote.urls list: {e}")
+
+                try:
+                    config_fetch_url = remote.config_reader.get_value('url', 'Not Found in Config')
+                    logger.info(f"Diag: config_reader.get_value('url'): {config_fetch_url}")
+                except Exception as e:
+                    logger.info(f"Diag: Error accessing config_reader for 'url': {e}")
+
+                try:
+                    config_push_url_explicit = remote.config_reader.get_value('pushurl', 'Not Found in Config')
+                    logger.info(f"Diag: config_reader.get_value('pushurl'): {config_push_url_explicit}")
+                except Exception as e:
+                    logger.info(f"Diag: Error accessing config_reader for 'pushurl': {e}")
+                # --- End Diagnostic Logging ---
+
+                try:
+                    # remote.url usually gives the fetch URL or the first configured URL
+                    if remote.url: # Check if attribute exists and is not None
+                        fetch_url = remote.url
+                except Exception as e: # Catching broader exceptions for safety
+                    logger.warning(f"Could not get primary URL for remote '{remote.name}' in repo {repo_path} using remote.url: {e}")
+                
+                # If fetch_url is still empty, try getting it from config_reader as a fallback
+                if not fetch_url:
+                    try:
+                        config_primary_url = remote.config_reader.get_value('url', None)
+                        if config_primary_url:
+                            fetch_url = config_primary_url
+                            logger.info(f"Used config_reader.get_value('url') for fetch_url for remote '{remote.name}'")
+                    except Exception as e:
+                        logger.warning(f"Could not get URL for remote '{remote.name}' from config_reader: {e}")
+
+
+                try:
+                    # Check if a specific pushurl is configured
+                    configured_push_url = remote.config_reader.get_value('pushurl', None)
+                    if configured_push_url:
+                        push_url = configured_push_url
+                        logger.info(f"Explicit pushurl found for remote '{remote.name}': {push_url}")
+                    elif fetch_url: # If no specific pushurl, it defaults to the fetch url
+                        push_url = fetch_url
+                        logger.info(f"No explicit pushurl for remote '{remote.name}', defaulting to fetch_url: {push_url}")
+                    else:
+                        logger.warning(f"No explicit pushurl and no fetch_url to default to for remote '{remote.name}'.")
+                except Exception as e:
+                    logger.warning(f"Could not determine push URL for remote '{remote.name}' in repo {repo_path} from config: {e}")
+                    if fetch_url and not push_url: # Fallback if error during pushurl specific lookup
+                        push_url = fetch_url
+                        logger.info(f"Fallback: push_url set to fetch_url for remote '{remote.name}' after exception: {push_url}")
+                    elif not fetch_url and not push_url:
+                        logger.warning(f"Push URL for remote '{remote.name}' remains undetermined after exception and no fetch_url.")
+                
                 remotes.append({
                     "name": remote.name,
-                    "url": next(remote.urls, "")
+                    "fetch_url": fetch_url,
+                    "push_url": push_url
                 })
             
             # Get recent commits

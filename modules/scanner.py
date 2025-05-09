@@ -2,8 +2,10 @@ import os
 import logging
 from pathlib import Path
 from datetime import datetime
+import hashlib
 import concurrent.futures
 import gitignore_parser
+from .git_operations import GitOperations # Ensure GitOperations is imported
 
 logger = logging.getLogger(__name__)
 
@@ -179,51 +181,90 @@ class RepositoryScanner:
         
         return git_repos_found, non_git_dirs_found
     
-    def get_repo_info(self, repo_path):
-        """Get basic information about a git repository"""
-        path_obj = Path(repo_path)
+    def _get_repo_description(self, repo_path_obj: Path):
+        """
+        Attempts to read the repository description from .git/description.
+        
+        Args:
+            repo_path_obj (Path): Path object to the repository.
+            
+        Returns:
+            str or None: The repository description if found, otherwise None.
+        """
         try:
-            last_modified_time = path_obj.stat().st_mtime
-            last_modified_iso = datetime.fromtimestamp(last_modified_time).isoformat()
-        except OSError as e:
-            logger.warning(f"Could not get stats for {repo_path}: {e}")
-            last_modified_iso = "N/A"
+            description_file = repo_path_obj / ".git" / "description"
+            if description_file.is_file():
+                with open(description_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    description = f.readline().strip()
+                    # Default description is often "Unnamed repository; edit this file 'description' to name the repository."
+                    # We might want to return None if it's the default, or just return it as is.
+                    if "Unnamed repository" in description:
+                        return None # Or return the default string if you prefer
+                    return description
+        except Exception as e:
+            logger.warning(f"Could not read .git/description for {repo_path_obj}: {e}")
+        return None
+
+    def _extract_basic_repo_info(self, repo_path_obj: Path):
+        """
+        Extract basic and detailed information about a Git repository.
+        
+        Args:
+            repo_path_obj (Path): Path object to the repository.
+            
+        Returns:
+            dict: Dictionary containing repository information.
+        """
+        repo_path_str = str(repo_path_obj)
+        repo_name = repo_path_obj.name
         
         # Generate a unique ID based on the path
-        repo_id = str(path_obj).replace("/", "_").replace("\\", "_").replace(":", "")
+        # Using a more robust method like hashing the absolute path
+        try:
+            abs_path = str(repo_path_obj.resolve())
+        except Exception: # Handle potential errors like non-existent symlink targets
+            abs_path = repo_path_str
+        repo_id = hashlib.md5(abs_path.encode('utf-8')).hexdigest()
+
+        # Get last modified time of the .git directory as an indicator
+        git_dir = repo_path_obj / ".git"
+        last_modified_timestamp = datetime.now().timestamp() # Default to now
+        if git_dir.exists() and git_dir.is_dir():
+            last_modified_timestamp = git_dir.stat().st_mtime
         
-        info = {
+        last_modified_iso = datetime.fromtimestamp(last_modified_timestamp).isoformat()
+
+        # Basic info
+        basic_info = {
             "id": repo_id,
-            "path": str(path_obj.resolve()),
-            "name": path_obj.name,
+            "name": repo_name,
+            "path": repo_path_str,
+            "description": self._get_repo_description(repo_path_obj),
             "last_modified": last_modified_iso,
+            "type": "git_repository" 
         }
-        return info
-    
-    def get_dir_info(self, dir_path):
-        """Get basic information about a non-git directory"""
-        path_obj = Path(dir_path)
-        try:
-            last_modified_time = path_obj.stat().st_mtime
-            last_modified_iso = datetime.fromtimestamp(last_modified_time).isoformat()
-        except OSError as e:
-            logger.warning(f"Could not get stats for {dir_path}: {e}")
-            last_modified_iso = "N/A"
-        
-        # Generate a unique ID based on the path
-        dir_id = str(path_obj).replace("/", "_").replace("\\", "_").replace(":", "")
-        
-        info = {
-            "id": dir_id,
-            "path": str(path_obj.resolve()),
-            "name": path_obj.name,
-            "last_modified": last_modified_iso,
-        }
-        return info
-    
+
+        # Get detailed Git information using GitOperations
+        git_ops = GitOperations()
+        detailed_git_info = git_ops.get_repository_info(repo_path_str)
+
+        # Merge basic info with detailed Git info
+        # Basic info takes precedence for id, name, path, description, last_modified
+        # as they are derived by the scanner itself.
+        # Detailed info adds/overwrites git-specific fields like branch, remotes, commits, status.
+        combined_info = {**detailed_git_info, **basic_info}
+        # Ensure 'remotes' from detailed_git_info is preserved if it exists
+        if 'remotes' in detailed_git_info:
+            combined_info['remotes'] = detailed_git_info['remotes']
+        else:
+            combined_info['remotes'] = [] # Ensure remotes key exists
+
+        return combined_info
+
     def get_repositories_info(self, repos):
         """Get information for a list of repositories"""
-        return [self.get_repo_info(repo) for repo in repos]
+        # Changed to use _extract_basic_repo_info to get detailed data
+        return [self._extract_basic_repo_info(Path(repo)) for repo in repos]
     
     def get_directories_info(self, dirs):
         """Get information for a list of directories"""
