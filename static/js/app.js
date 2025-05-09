@@ -215,25 +215,56 @@
 
     // Component: ScanStatusDisplay (New)
     function ScanStatusDisplay({ isScanning, scanProgressMessages, scanError }) {
-        if (!isScanning && scanProgressMessages.length === 0 && !scanError) {
+        const [isExpanded, setIsExpanded] = React.useState(false); // Initialize as collapsed
+
+        // Determine if there's anything to display at all (header or content)
+        const hasContent = isScanning || scanError || scanProgressMessages.length > 0;
+
+        if (!hasContent) {
             return null;
         }
 
+        const toggleExpansion = () => {
+            setIsExpanded(!isExpanded);
+        };
+
         return e(
             'div',
-            { className: 'glass-dark p-4 mb-6 rounded-lg' }, // Changed to mb-6
-            isScanning && e('div', { className: 'flex items-center text-teal-300 mb-2' },
-                e(Icon, { name: 'spinner', className: 'animate-spin mr-2' }),
-                'Scan in progress...'
+            { className: 'glass-dark p-4 mb-6 rounded-lg' },
+            e(
+                'div', // Clickable header area
+                { 
+                    className: 'flex items-center justify-between cursor-pointer hover:bg-white/5 p-1 -m-1 rounded', // Added padding and negative margin for better click area
+                    onClick: toggleExpansion 
+                },
+                e('div', {className: 'flex items-center'}, // Group title and scanning status
+                    isScanning && e(Icon, { name: 'spinner', className: 'animate-spin mr-2 text-teal-300' }),
+                    !isScanning && scanError && e(Icon, { name: 'exclamation-circle', className: 'mr-2 text-red-400' }),
+                    !isScanning && !scanError && scanProgressMessages.length > 0 && e(Icon, { name: 'check-circle', className: 'mr-2 text-green-400' }),
+                    e('span', { className: `font-medium ${isScanning ? 'text-teal-300' : scanError ? 'text-red-300' : 'text-gray-200'}`},
+                        isScanning ? 'Scan in progress...' : scanError ? 'Scan Error Occurred' : 'Scan Activity'
+                    )
+                ),
+                e(Icon, { name: isExpanded ? 'chevron-up' : 'chevron-down', className: 'text-gray-400' })
             ),
-            scanError && e('div', { className: 'log-error p-2 rounded mb-2' }, // Use log-error style
-                e(Icon, { name: 'exclamation-circle', className: 'mr-2' }),
-                `Scan Error: ${scanError}`
-            ),
-            scanProgressMessages.length > 0 && e(
+            
+            // Collapsible content area
+            isExpanded && e(
                 'div',
-                { className: 'log-container text-xs', style: { maxHeight: '150px' } }, // Use log-container style
-                scanProgressMessages.map((msg, index) => e('p', { key: index }, msg))
+                { className: 'mt-3 pt-3 border-t border-white/10' }, // Add top border when expanded
+                scanError && e('div', { className: 'log-error p-2 rounded mb-2 text-sm' }, // Use log-error style
+                    // Error message is already part of the header, but if you want more detail:
+                    // e(Icon, { name: 'exclamation-circle', className: 'mr-2' }), 
+                    `Details: ${scanError}`
+                ),
+                scanProgressMessages.length > 0 && e(
+                    'div',
+                    { className: 'log-container text-xs', style: { maxHeight: '150px' } }, // Use log-container style
+                    scanProgressMessages.map((msg, index) => e('p', { key: index }, msg))
+                ),
+                !isScanning && !scanError && scanProgressMessages.length === 0 && e(
+                    'p', {className: 'text-sm text-gray-400'}, 'No scan messages to display.'
+                )
             )
         );
     }
