@@ -175,7 +175,20 @@
     }
 
     // Component: RepositoryDetailModal
-    function RepositoryDetailModal({ selectedRepo, closeRepoDetails, pullLogs, pullInProgress, pullRepository }) {
+    function RepositoryDetailModal({ 
+        selectedRepo, 
+        closeRepoDetails, 
+        pullLogs, 
+        pullInProgress, 
+        pullRepository,
+        repoStatusOutput,
+        statusLoading,
+        statusError,
+        fetchRepoStatus,
+        discardLoading,        // New prop
+        discardError,          // New prop
+        discardRepoChanges     // New prop
+    }) {
         if (!selectedRepo) {
             return null;
         }
@@ -229,11 +242,11 @@
                     ),
                     e(
                         'div',
-                        { className: 'mt-6 mb-4' }, // Added mb-4
+                        { className: 'mt-6 mb-4 flex flex-wrap gap-3' }, // Added flex-wrap and gap
                         e(
                             'button',
                             {
-                                className: `glass-button px-4 py-2 flex items-center ${pullInProgress ? 'opacity-50 cursor-not-allowed' : ''}`, // Used glass-button
+                                className: `glass-button px-4 py-2 flex items-center ${pullInProgress ? 'opacity-50 cursor-not-allowed' : ''}`,
                                 onClick: () => pullRepository(selectedRepo.id),
                                 disabled: pullInProgress
                             },
@@ -241,7 +254,70 @@
                                 ? e(Icon, { name: 'spinner', className: 'mr-2 animate-spin' })
                                 : e(Icon, { name: 'sync-alt', className: 'mr-2' }),
                             pullInProgress ? 'Pulling...' : 'Pull Latest Changes'
+                        ),
+                        // New "Get Status" button
+                        e(
+                            'button',
+                            {
+                                className: `glass-button px-4 py-2 flex items-center ${statusLoading ? 'opacity-50 cursor-not-allowed' : ''}`,
+                                onClick: () => fetchRepoStatus(selectedRepo.id),
+                                disabled: statusLoading,
+                                style: { backgroundColor: 'var(--color-accent-hover)'} // Slightly different color for distinction
+                            },
+                            statusLoading
+                                ? e(Icon, { name: 'spinner', className: 'mr-2 animate-spin' })
+                                : e(Icon, { name: 'info-circle', className: 'mr-2' }), // Example icon
+                            statusLoading ? 'Getting Status...' : 'Get Status'
+                        ),
+                        // New "Discard Changes" button
+                        e(
+                            'button',
+                            {
+                                className: `glass-button px-4 py-2 flex items-center ${discardLoading ? 'opacity-50 cursor-not-allowed' : ''}`,
+                                onClick: () => {
+                                    // CRITICAL CONFIRMATION
+                                    const confirmDiscard = window.confirm(
+                                        "DANGER: Are you sure you want to discard ALL local changes?\n\n" +
+                                        "This will:\n" +
+                                        "- Remove all uncommitted changes to tracked files (git reset --hard HEAD).\n" +
+                                        "- Permanently delete all untracked files and directories (git clean -fd).\n\n" +
+                                        "THIS ACTION CANNOT BE UNDONE."
+                                    );
+                                    if (confirmDiscard) {
+                                        discardRepoChanges(selectedRepo.id);
+                                    }
+                                },
+                                disabled: discardLoading,
+                                // Style to indicate a potentially dangerous action
+                                style: { backgroundColor: 'var(--color-log-error)', color: 'var(--color-text-primary)' } 
+                            },
+                            discardLoading
+                                ? e(Icon, { name: 'spinner', className: 'mr-2 animate-spin' })
+                                : e(Icon, { name: 'trash', className: 'mr-2' }), // Example icon for discard
+                            discardLoading ? 'Discarding...' : 'Discard Changes'
                         )
+                    ),
+                    // Display Git Status Output or Discard Error/Success
+                    (repoStatusOutput || statusError || discardError || (discardLoading === false && !discardError && !statusLoading && !pullInProgress && selectedRepo.lastDiscardMessage)) && e(
+                        'div',
+                        { className: 'mt-4' },
+                        (repoStatusOutput || statusError) && e(React.Fragment, null, // Group status related elements
+                            e('h3', { className: 'text-lg font-semibold mb-2 flex items-center' },
+                                e(Icon, { name: 'clipboard-list', className: 'mr-2 text-teal-400' }),
+                                'Git Status'
+                            ),
+                            statusError && e('p', { className: 'log-error p-2 rounded bg-red-500/20' }, `Error: ${statusError}`),
+                            repoStatusOutput && e(
+                                'pre',
+                                {
+                                    className: 'log-container',
+                                    style: { maxHeight: '10rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }
+                                },
+                                repoStatusOutput
+                            )
+                        ),
+                        discardError && e('p', { className: 'log-error p-2 rounded bg-red-500/20 mt-2' }, `Discard Error: ${discardError}`),
+                        selectedRepo.lastDiscardMessage && !discardError && e('p', { className: 'log-success p-2 rounded bg-green-500/20 mt-2' }, selectedRepo.lastDiscardMessage)
                     ),
                     (pullLogs.length > 0 || pullInProgress) && e( // Show log container if logs exist or pull is in progress
                         'div',
@@ -330,6 +406,15 @@
         const [sortBy, setSortBy] = React.useState('name');
         const [loadingStates, setLoadingStates] = React.useState({});
         const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'dark');
+        // New state variables for Git Status
+        const [repoStatusOutput, setRepoStatusOutput] = React.useState(null);
+        const [statusLoading, setStatusLoading] = React.useState(false);
+        const [statusError, setStatusError] = React.useState(null);
+        // New state variables for Discard Changes
+        const [discardLoading, setDiscardLoading] = React.useState(false);
+        const [discardError, setDiscardError] = React.useState(null);
+        const [lastDiscardMessage, setLastDiscardMessage] = React.useState(null);
+
 
         React.useEffect(() => {
             if (theme === 'light') {
@@ -364,6 +449,10 @@
             setPullLogs([]);
             setPullInProgress(false);
             setSelectedRepo(null);
+            setRepoStatusOutput(null); 
+            setStatusError(null);      
+            setDiscardError(null); // Clear discard error on close
+            setLastDiscardMessage(null); // Clear last discard message
         };
 
         React.useEffect(() => {
@@ -376,6 +465,10 @@
             if (selectedRepo) {
                 setPullLogs([]);
                 setPullInProgress(false);
+                setRepoStatusOutput(null); 
+                setStatusError(null);      
+                setDiscardError(null); // Clear discard error when repo changes
+                setLastDiscardMessage(null); // Clear last discard message
                 if (eventSource) {
                     eventSource.close();
                     setEventSource(null);
@@ -476,6 +569,51 @@
             pullRepository(repoId, true);
         };
 
+        // Function to fetch Git status
+        const fetchRepoStatus = async (repoId) => {
+            setStatusLoading(true);
+            setRepoStatusOutput(null);
+            setStatusError(null);
+            try {
+                const response = await fetch(`/api/repository/${repoId}/status`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setRepoStatusOutput(data.status_output);
+            } catch (error) {
+                console.error('Error fetching repository status:', error);
+                setStatusError(error.message);
+                setRepoStatusOutput(null);
+            } finally {
+                setStatusLoading(false);
+            }
+        };
+
+        // Function to discard local changes
+        const discardRepoChanges = async (repoId) => {
+            setDiscardLoading(true);
+            setDiscardError(null);
+            setLastDiscardMessage(null);
+            try {
+                const response = await fetch(`/api/repository/${repoId}/discard_changes`, {
+                    method: 'POST',
+                });
+                const data = await response.json(); // Attempt to parse JSON regardless of ok status
+                if (!response.ok) {
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                }
+                setLastDiscardMessage(data.message || 'Local changes discarded successfully.');
+                // Optionally, refresh status or other details
+                fetchRepoStatus(repoId); 
+            } catch (error) {
+                console.error('Error discarding repository changes:', error);
+                setDiscardError(error.message);
+            } finally {
+                setDiscardLoading(false);
+            }
+        };
 
         const fetchRepositories = async () => {
             try {
@@ -550,7 +688,18 @@
             ),
             
             e(RepositoryDetailModal, {
-                selectedRepo, closeRepoDetails, pullLogs, pullInProgress, pullRepository
+                selectedRepo, 
+                closeRepoDetails, 
+                pullLogs, 
+                pullInProgress, 
+                pullRepository,
+                repoStatusOutput,
+                statusLoading,
+                statusError,
+                fetchRepoStatus,
+                discardLoading,       // Pass new state
+                discardError,         // Pass new state
+                discardRepoChanges    // Pass new function
             })
         );
     }

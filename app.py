@@ -394,6 +394,62 @@ def pull_repository(repo_id):
         logger.error(f"Error initiating repository pull: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/repository/<repo_id>/status', methods=['GET'])
+def get_repository_status(repo_id):
+    """Get the git status for a specific repository"""
+    try:
+        results = config_manager.get_scan_results()
+        repositories = results.get("git_repositories", [])
+        
+        repository = next((repo for repo in repositories if repo.get("id") == repo_id), None)
+        
+        if not repository:
+            return jsonify({"error": "Repository not found"}), 404
+            
+        repo_path = repository.get("path")
+        if not repo_path:
+            return jsonify({"error": "Repository path not found"}), 404
+
+        git_ops = GitOperations()
+        status_output = git_ops.get_git_status(repo_path) # Assumes get_git_status exists in GitOperations
+        
+        if status_output is None: # Or however your get_git_status indicates an error
+             return jsonify({"error": "Failed to get git status. Not a git repository or other error."}), 500
+
+        return jsonify({"status_output": status_output})
+        
+    except Exception as e:
+        logger.error(f"Error retrieving repository status for {repo_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/repository/<repo_id>/discard_changes', methods=['POST'])
+def discard_repository_changes(repo_id):
+    """Discard all local changes (reset --hard and clean -fd) for a repository."""
+    try:
+        results = config_manager.get_scan_results()
+        repositories = results.get("git_repositories", [])
+        repository = next((repo for repo in repositories if repo.get("id") == repo_id), None)
+
+        if not repository:
+            return jsonify({"error": "Repository not found"}), 404
+            
+        repo_path = repository.get("path")
+        if not repo_path:
+            return jsonify({"error": "Repository path not found"}), 404
+
+        git_ops = GitOperations()
+        # This method will need to be created in GitOperations
+        success, message = git_ops.discard_local_changes(repo_path) 
+        
+        if not success:
+            return jsonify({"error": message or "Failed to discard local changes."}), 500
+
+        return jsonify({"message": message or "Local changes discarded successfully."})
+        
+    except Exception as e:
+        logger.error(f"Error discarding changes for repository {repo_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/config', methods=['GET'])
 def get_config():
     """Get the current configuration"""

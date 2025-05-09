@@ -110,6 +110,75 @@ class GitOperations:
         else:
             return "Clean"
     
+    def get_git_status(self, repo_path):
+        """
+        Get the output of 'git status --porcelain' for a repository.
+
+        Args:
+            repo_path (str): Path to the repository.
+
+        Returns:
+            str: The output of 'git status --porcelain', or None if an error occurs.
+        """
+        try:
+            repo = Repo(repo_path)
+            # Ensure it's a valid git repo and not bare
+            if repo.bare:
+                logger.warning(f"Cannot get status for bare repository: {repo_path}")
+                return "Bare repository, cannot display status."
+            
+            # Using repo.git.status(porcelain=True) is a direct way with gitpython
+            status_output = repo.git.status(porcelain=True)
+            if not status_output: # If status is clean, porcelain output is empty
+                return "Clean"
+            return status_output
+        except git.InvalidGitRepositoryError:
+            logger.error(f"Not a git repository: {repo_path}")
+            return None # Or a specific error message string
+        except Exception as e:
+            logger.error(f"Error getting git status for {repo_path}: {e}")
+            return None # Or a specific error message string
+
+    def discard_local_changes(self, repo_path):
+        """
+        Discard all local changes in the repository.
+        This executes 'git reset --hard HEAD' and 'git clean -fd'.
+
+        Args:
+            repo_path (str): Path to the repository.
+
+        Returns:
+            tuple: (bool, str) indicating success status and a message.
+        """
+        try:
+            repo = Repo(repo_path)
+            if repo.bare:
+                msg = "Cannot discard changes in a bare repository."
+                logger.warning(msg)
+                return False, msg
+
+            # Reset any staged or uncommitted changes in tracked files
+            logger.info(f"Running 'git reset --hard HEAD' in {repo_path}")
+            repo.git.reset('--hard', 'HEAD')
+            
+            # Remove untracked files and directories
+            # -d: remove untracked directories in addition to untracked files
+            # -f: force (required if clean.requireForce is not set to false)
+            logger.info(f"Running 'git clean -fd' in {repo_path}")
+            repo.git.clean('-fd')
+            
+            msg = "Local changes discarded successfully."
+            logger.info(msg + f" in {repo_path}")
+            return True, msg
+        except git.InvalidGitRepositoryError:
+            msg = f"Not a git repository: {repo_path}"
+            logger.error(msg)
+            return False, msg
+        except Exception as e:
+            msg = f"Error discarding local changes for {repo_path}: {e}"
+            logger.error(msg)
+            return False, msg
+
     def pull_repository(self, repo_path, progress_callback=None):
         """
         Pull the latest changes for a repository
