@@ -56,45 +56,163 @@
     }
 
     // Component: ControlsBar
-    function ControlsBar({ searchQuery, setSearchQuery, sortBy, setSortBy, loading, repositoriesCount }) {
-        if (loading || repositoriesCount === 0) {
-            return null;
+    function ControlsBar({ 
+        searchQuery, setSearchQuery, 
+        sortBy, setSortBy, 
+        loading, repositoriesCount,
+        scanPathInput, setScanPathInput,       // New prop
+        scanDepthInput, setScanDepthInput,     // New prop
+        handleStartScan,                       // New prop
+        isScanning                             // New prop
+    }) {
+        // Hide controls if initial loading or no repos and not currently scanning
+        if (loading || (repositoriesCount === 0 && !isScanning)) {
+            // Still show scan controls if no repos but allow scanning
+            if (repositoriesCount === 0 && !isScanning) {
+                 // Render only scan controls if no repos yet
+                return e(
+                    'div',
+                    { className: 'glass-light p-4 mb-6 flex flex-col sm:flex-row items-start gap-4' },
+                    e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[2]' }, // Wider path input
+                        e('label', { htmlFor: 'scanPath', className: 'text-sm font-medium opacity-80' }, 'Scan Path'),
+                        e('input', {
+                            type: 'text',
+                            id: 'scanPath',
+                            placeholder: 'Enter absolute folder path to scan',
+                            className: 'glass-input w-full',
+                            value: scanPathInput,
+                            onChange: (e) => setScanPathInput(e.target.value),
+                            disabled: isScanning
+                        })
+                    ),
+                    e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[1]' }, // Narrower depth input
+                        e('label', { htmlFor: 'scanDepth', className: 'text-sm font-medium opacity-80' }, 'Scan Depth'),
+                        e('input', {
+                            type: 'number',
+                            id: 'scanDepth',
+                            placeholder: 'Depth',
+                            className: 'glass-input w-full sm:w-24',
+                            value: scanDepthInput,
+                            onChange: (e) => setScanDepthInput(e.target.value),
+                            min: '0',
+                            disabled: isScanning
+                        })
+                    ),
+                    e('div', { className: 'w-full sm:w-auto pt-0 sm:pt-7' }, // Align button with inputs
+                        e('button', {
+                            onClick: handleStartScan,
+                            className: `glass-button px-4 py-2 w-full sm:w-auto flex items-center justify-center ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`,
+                            disabled: isScanning
+                        },
+                        isScanning ? e(Icon, { name: 'spinner', className: 'animate-spin mr-2' }) : e(Icon, { name: 'search-location', className: 'mr-2' }),
+                        isScanning ? 'Scanning...' : 'Scan Repositories'
+                        )
+                    )
+                );
+            }
+            return null; // Hide all controls if loading initial repo list
         }
+
         return e(
             'div',
-            { className: 'glass-light p-4 mb-4 flex flex-col sm:flex-row items-center gap-4' },
-            e(
-                'div', 
-                { className: 'relative flex-grow w-full sm:w-auto' }, 
-                e(Icon, { 
-                    name: 'search', 
-                    className: 'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400' // Kept gray for subtlety
-                }),
-                e('input', {
-                    type: 'text',
-                    placeholder: 'Search repositories...',
-                    value: searchQuery,
-                    onChange: (event) => setSearchQuery(event.target.value),
-                    className: 'glass-input w-full pl-10 pr-4',
-                    'aria-label': 'Search repositories'
-                })
-            ),
-            e(
-                'div',
-                { className: 'flex items-center gap-2' },
-                e('label', { htmlFor: 'sort-select', className: 'text-sm' }, 'Sort by:'),
-                e(
-                    'select',
-                    {
-                        id: 'sort-select',
-                        className: 'glass-input py-2', // Adjusted padding for select
-                        value: sortBy,
-                        onChange: (event) => setSortBy(event.target.value),
-                        'aria-label': 'Sort repositories'
+            { className: 'glass-light p-4 mb-6 flex flex-col items-start gap-4' }, // Changed to mb-6
+            // Scan Controls Row
+            e('div', {className: 'w-full flex flex-col sm:flex-row items-start gap-4'},
+                e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[2]' }, 
+                    e('label', { htmlFor: 'scanPath', className: 'text-sm font-medium opacity-80' }, 'Scan Path'),
+                    e('input', {
+                        type: 'text',
+                        id: 'scanPath',
+                        placeholder: 'Enter absolute folder path to scan',
+                        className: 'glass-input w-full',
+                        value: scanPathInput,
+                        onChange: (e) => setScanPathInput(e.target.value),
+                        disabled: isScanning
+                    })
+                ),
+                e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[1]' },
+                    e('label', { htmlFor: 'scanDepth', className: 'text-sm font-medium opacity-80' }, 'Scan Depth'),
+                    e('input', {
+                        type: 'number',
+                        id: 'scanDepth',
+                        placeholder: 'Depth',
+                        className: 'glass-input w-full sm:w-24',
+                        value: scanDepthInput,
+                        onChange: (e) => setScanDepthInput(e.target.value),
+                        min: '0',
+                        disabled: isScanning
+                    })
+                ),
+                e('div', { className: 'w-full sm:w-auto pt-0 sm:pt-7' },
+                    e('button', {
+                        onClick: handleStartScan,
+                        className: `glass-button px-4 py-2 w-full sm:w-auto flex items-center justify-center ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`,
+                        disabled: isScanning
                     },
-                    e('option', { value: 'name' }, 'Name'),
-                    e('option', { value: 'modified' }, 'Last Modified')
+                    isScanning ? e(Icon, { name: 'spinner', className: 'animate-spin mr-2' }) : e(Icon, { name: 'search-location', className: 'mr-2' }),
+                    isScanning ? 'Scanning...' : 'Scan Repositories'
+                    )
                 )
+            ),
+            // Search and Sort Row (only if repositories exist)
+            repositoriesCount > 0 && e('div', {className: 'w-full flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-white/10'},
+                e(
+                    'div', 
+                    { className: 'relative flex-grow w-full sm:w-auto' }, 
+                    e(Icon, { 
+                        name: 'search', 
+                        className: 'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400' 
+                    }),
+                    e('input', {
+                        type: 'text',
+                        placeholder: 'Search repositories...',
+                        className: 'glass-input pl-10 pr-4 py-2 w-full',
+                        value: searchQuery,
+                        onChange: (e) => setSearchQuery(e.target.value)
+                    })
+                ),
+                e(
+                    'div',
+                    { className: 'flex items-center gap-2 w-full sm:w-auto' },
+                    e('label', { htmlFor: 'sortBy', className: 'text-sm opacity-80' }, 'Sort by:'),
+                    e(
+                        'select',
+                        {
+                            id: 'sortBy',
+                            className: 'glass-input px-3 py-2 ',
+                            value: sortBy,
+                            onChange: (e) => setSortBy(e.target.value)
+                        },
+                        e('option', { value: 'name' }, 'Name'),
+                        e('option', { value: 'last_modified' }, 'Last Modified'),
+                        e('option', { value: 'status' }, 'Status')
+                    )
+                )
+            )
+        );
+    }
+
+    // Component: ScanStatusDisplay (New)
+    function ScanStatusDisplay({ isScanning, scanProgressMessages, scanError }) {
+        if (!isScanning && scanProgressMessages.length === 0 && !scanError) {
+            return null;
+        }
+
+        return e(
+            'div',
+            { className: 'glass-dark p-4 mb-6 rounded-lg' }, // Changed to mb-6
+            isScanning && e('div', { className: 'flex items-center text-teal-300 mb-2' },
+                e(Icon, { name: 'spinner', className: 'animate-spin mr-2' }),
+                'Scan in progress...'
+            ),
+            scanError && e('div', { className: 'log-error p-2 rounded mb-2' }, // Use log-error style
+                e(Icon, { name: 'exclamation-circle', className: 'mr-2' }),
+                `Scan Error: ${scanError}`
+            ),
+            scanProgressMessages.length > 0 && e(
+                'div',
+                { className: 'log-container text-xs', style: { maxHeight: '150px' } }, // Use log-container style
+                scanProgressMessages.map((msg, index) => e('p', { key: index }, msg))
             )
         );
     }
@@ -433,7 +551,7 @@
     // Main App component
     function App() {
         const [repositories, setRepositories] = React.useState([]);
-        const [loading, setLoading] = React.useState(true);
+        const [loading, setLoading] = React.useState(true); // For initial repo list load
         const [selectedRepo, setSelectedRepo] = React.useState(null);
         const [pullLogs, setPullLogs] = React.useState([]);
         const [pullInProgress, setPullInProgress] = React.useState(false);
@@ -450,6 +568,14 @@
         const [discardLoading, setDiscardLoading] = React.useState(false);
         const [discardError, setDiscardError] = React.useState(null);
         const [lastDiscardMessage, setLastDiscardMessage] = React.useState(null);
+
+        // New state for manual scan feature
+        const [scanPathInput, setScanPathInput] = React.useState('');
+        const [scanDepthInput, setScanDepthInput] = React.useState('5'); // Default depth
+        const [isScanning, setIsScanning] = React.useState(false); // For manual scan process
+        const [scanProgressMessages, setScanProgressMessages] = React.useState([]);
+        const [scanError, setScanError] = React.useState(null);
+        const [scanEventSource, setScanEventSource] = React.useState(null);
 
 
         React.useEffect(() => {
@@ -605,7 +731,6 @@
             pullRepository(repoId, true);
         };
 
-        // Function to fetch Git status
         const fetchRepoStatus = async (repoId) => {
             setStatusLoading(true);
             setRepoStatusOutput(null);
@@ -627,7 +752,6 @@
             }
         };
 
-        // Function to discard local changes
         const discardRepoChanges = async (repoId) => {
             setDiscardLoading(true);
             setDiscardError(null);
@@ -651,9 +775,81 @@
             }
         };
 
-        const fetchRepositories = async () => {
+        // Function to start a new repository scan
+        const handleStartScan = async () => {
+            if (!scanPathInput.trim()) {
+                setScanError('Scan path cannot be empty.');
+                setScanProgressMessages([]);
+                return;
+            }
+
+            setIsScanning(true);
+            setScanError(null);
+            setScanProgressMessages(['Scan initiated...']);
+            setRepositories([]); // Clear existing repositories from display
+
+            // Close existing scan SSE connection if any
+            if (scanEventSource) {
+                scanEventSource.close();
+            }
+
             try {
-                setLoading(true);
+                const response = await fetch(`/api/scan?path=${encodeURIComponent(scanPathInput)}&depth=${encodeURIComponent(scanDepthInput)}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                // Backend confirms scan started, now connect to SSE for progress
+                const newScanEventSource = new EventSource('/api/scan/progress');
+                setScanEventSource(newScanEventSource);
+
+                newScanEventSource.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.status === 'heartbeat') return;
+
+                    let message = data.message || (data.update ? data.update.message : null) || data.status;
+                    
+                    if (data.progress && data.progress.message) {
+                        message = data.progress.message;
+                    }
+                    if (data.update && data.update.path) {
+                         message += ` (${data.update.path})`;
+                    }
+
+                    setScanProgressMessages(prev => [...prev, message]);
+
+                    if (data.status === 'completed') {
+                        setIsScanning(false);
+                        setScanProgressMessages(prev => [...prev, 'Scan completed successfully! Fetching updated repository list...']);
+                        fetchRepositories(); // Refresh the main list
+                        newScanEventSource.close();
+                        setScanEventSource(null);
+                    } else if (data.status === 'error') {
+                        setIsScanning(false);
+                        setScanError(data.message || 'An unknown error occurred during scan.');
+                        newScanEventSource.close();
+                        setScanEventSource(null);
+                    }
+                };
+
+                newScanEventSource.onerror = (error) => {
+                    console.error('Scan SSE error:', error);
+                    setIsScanning(false);
+                    setScanError('Connection error during scan progress updates.');
+                    newScanEventSource.close();
+                    setScanEventSource(null);
+                };
+
+            } catch (error) {
+                console.error('Error starting scan:', error);
+                setScanError(error.message);
+                setIsScanning(false);
+            }
+        };
+
+        const fetchRepositories = async () => {
+            setLoading(true); // For initial repo list load or re-fetch
+            try {
                 const response = await fetch('/api/repositories');
                 const data = await response.json();
                 setRepositories(data);
@@ -675,12 +871,20 @@
             e(ThemeToggleButton, { theme, toggleTheme }),
             e(HeaderComponent),
             e(ControlsBar, { 
-                searchQuery, setSearchQuery, sortBy, setSortBy, 
-                loading, repositoriesCount: repositories.length 
+                searchQuery, setSearchQuery, 
+                sortBy, setSortBy, 
+                loading: loading && !isScanning, // Pass loading state for initial list
+                repositoriesCount: repositories.length,
+                scanPathInput, setScanPathInput,      // Pass scan state
+                scanDepthInput, setScanDepthInput,    // Pass scan state
+                handleStartScan,                      // Pass scan handler
+                isScanning                            // Pass scan status
             }),
-            
-            loading ? e(LoadingSkeleton) :
-            repositories.length === 0 ? e(EmptyState) :
+            // Display Scan Status
+            e(ScanStatusDisplay, { isScanning, scanProgressMessages, scanError }),
+
+            loading && !isScanning ? e(LoadingSkeleton) : // Show skeleton if loading initial list and not manually scanning
+            !isScanning && repositories.length === 0 && !scanError ? e(EmptyState) : // Show empty state if not scanning, no repos, no scan error
             e(
                 'div', // Main content area for repository list
                 { className: 'glass p-6' },

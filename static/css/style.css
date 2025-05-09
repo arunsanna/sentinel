@@ -136,6 +136,15 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Ensure ControlsBar items can wrap and align nicely */
+.controls-bar-grid { /* You might need to add this class to the main div in ControlsBar if flex alone isn't enough */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    align-items: end; /* Aligns items to the bottom, useful if labels make heights uneven */
+}
+
+
 .glass-button {
     background: var(--color-button-bg);
     color: var(--color-button-text);
