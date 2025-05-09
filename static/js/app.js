@@ -60,11 +60,32 @@
         searchQuery, setSearchQuery, 
         sortBy, setSortBy, 
         loading, repositoriesCount,
-        scanPathInput, setScanPathInput,       // New prop
-        scanDepthInput, setScanDepthInput,     // New prop
-        handleStartScan,                       // New prop
-        isScanning                             // New prop
+        scanPathInput, setScanPathInput,
+        scanDepthInput, setScanDepthInput,
+        handleStartScan,
+        isScanning
     }) {
+        const handleBrowseClick = async () => {
+            if (typeof window.showDirectoryPicker !== 'function') {
+                alert('Your browser does not support the File System Access API for directory picking. Please type the path manually.');
+                return;
+            }
+            try {
+                const directoryHandle = await window.showDirectoryPicker();
+                // The directoryHandle.name gives the name of the selected folder.
+                // This will set the input field to just the folder's name.
+                // The user needs to ensure the full path is correct for the backend.
+                setScanPathInput(directoryHandle.name); 
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    console.log('User cancelled the directory picker.');
+                } else {
+                    console.error('Error picking directory:', err);
+                    alert(`Error picking directory: ${err.message}`);
+                }
+            }
+        };
+        
         // Hide controls if initial loading or no repos and not currently scanning
         if (loading || (repositoriesCount === 0 && !isScanning)) {
             // Still show scan controls if no repos but allow scanning
@@ -73,17 +94,25 @@
                 return e(
                     'div',
                     { className: 'glass-light p-4 mb-6 flex flex-col sm:flex-row items-start gap-4' },
-                    e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[2]' }, // Wider path input
+                    e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[2]' },
                         e('label', { htmlFor: 'scanPath', className: 'text-sm font-medium opacity-80' }, 'Scan Path'),
-                        e('input', {
-                            type: 'text',
-                            id: 'scanPath',
-                            placeholder: 'Enter absolute folder path to scan',
-                            className: 'glass-input w-full',
-                            value: scanPathInput,
-                            onChange: (e) => setScanPathInput(e.target.value),
-                            disabled: isScanning
-                        })
+                        e('div', { className: 'flex items-center gap-2 w-full' }, // Wrapper for input and browse button
+                            e('input', {
+                                type: 'text',
+                                id: 'scanPath',
+                                placeholder: 'Enter path or browse (folder name)', // Updated placeholder
+                                className: 'glass-input flex-grow', 
+                                value: scanPathInput,
+                                onChange: (e) => setScanPathInput(e.target.value),
+                                disabled: isScanning
+                            }),
+                            e('button', {
+                                onClick: handleBrowseClick, // Updated to use showDirectoryPicker
+                                className: `glass-button px-3 py-2 flex-shrink-0 ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`,
+                                disabled: isScanning,
+                                title: 'Browse for folder'
+                            }, e(Icon, { name: 'folder-open', className: '' }))
+                        )
                     ),
                     e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[1]' }, // Narrower depth input
                         e('label', { htmlFor: 'scanDepth', className: 'text-sm font-medium opacity-80' }, 'Scan Depth'),
@@ -115,20 +144,27 @@
 
         return e(
             'div',
-            { className: 'glass-light p-4 mb-6 flex flex-col items-start gap-4' }, // Changed to mb-6
-            // Scan Controls Row
+            { className: 'glass-light p-4 mb-6 flex flex-col items-start gap-4' },
             e('div', {className: 'w-full flex flex-col sm:flex-row items-start gap-4'},
                 e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[2]' }, 
                     e('label', { htmlFor: 'scanPath', className: 'text-sm font-medium opacity-80' }, 'Scan Path'),
-                    e('input', {
-                        type: 'text',
-                        id: 'scanPath',
-                        placeholder: 'Enter absolute folder path to scan',
-                        className: 'glass-input w-full',
-                        value: scanPathInput,
-                        onChange: (e) => setScanPathInput(e.target.value),
-                        disabled: isScanning
-                    })
+                    e('div', { className: 'flex items-center gap-2 w-full' }, // Wrapper for input and browse button
+                        e('input', {
+                            type: 'text',
+                            id: 'scanPath',
+                            placeholder: 'Enter path or browse (folder name)', // Updated placeholder
+                            className: 'glass-input flex-grow',
+                            value: scanPathInput,
+                            onChange: (e) => setScanPathInput(e.target.value),
+                            disabled: isScanning
+                        }),
+                        e('button', {
+                            onClick: handleBrowseClick, // Updated to use showDirectoryPicker
+                            className: `glass-button px-3 py-2 flex-shrink-0 ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`,
+                            disabled: isScanning,
+                            title: 'Browse for folder'
+                        }, e(Icon, { name: 'folder-open', className: '' }))
+                    )
                 ),
                 e('div', { className: 'flex flex-col gap-2 w-full sm:w-auto sm:flex-grow-[1]' },
                     e('label', { htmlFor: 'scanDepth', className: 'text-sm font-medium opacity-80' }, 'Scan Depth'),
