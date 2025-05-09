@@ -190,13 +190,29 @@
         statusLoading,
         statusError,
         fetchRepoStatus,
-        discardLoading,        // New prop
-        discardError,          // New prop
-        discardRepoChanges     // New prop
+        discardLoading,
+        discardError,
+        discardRepoChanges 
     }) {
+        const [showDiscardConfirmationMessage, setShowDiscardConfirmationMessage] = React.useState(false); // New state for custom confirm
+
         if (!selectedRepo) {
             return null;
         }
+
+        const handleDiscardClick = () => {
+            setShowDiscardConfirmationMessage(true); // Show custom confirmation UI
+        };
+
+        const handleConfirmDiscard = () => {
+            discardRepoChanges(selectedRepo.id);
+            setShowDiscardConfirmationMessage(false); // Hide custom confirmation UI
+        };
+
+        const handleCancelDiscard = () => {
+            setShowDiscardConfirmationMessage(false); // Hide custom confirmation UI
+        };
+
         return e(
             React.Fragment,
             null,
@@ -271,39 +287,54 @@
                             },
                             statusLoading
                                 ? e(Icon, { name: 'spinner', className: 'mr-2 animate-spin' })
-                                : e(Icon, { name: 'info-circle', className: 'mr-2' }), // Example icon
+                                : e(Icon, { name: 'info-circle', className: 'mr-2' }), 
                             statusLoading ? 'Getting Status...' : 'Get Status'
                         ),
-                        // New "Discard Changes" button
+                        // "Discard Changes" button - now triggers custom confirmation
                         e(
                             'button',
                             {
-                                className: `glass-button px-4 py-2 flex items-center ${discardLoading ? 'opacity-50 cursor-not-allowed' : ''}`,
-                                onClick: () => {
-                                    // CRITICAL CONFIRMATION
-                                    const confirmDiscard = window.confirm(
-                                        "DANGER: Are you sure you want to discard ALL local changes?\n\n" +
-                                        "This will:\n" +
-                                        "- Remove all uncommitted changes to tracked files (git reset --hard HEAD).\n" +
-                                        "- Permanently delete all untracked files and directories (git clean -fd).\n\n" +
-                                        "THIS ACTION CANNOT BE UNDONE."
-                                    );
-                                    if (confirmDiscard) {
-                                        discardRepoChanges(selectedRepo.id);
-                                    }
-                                },
-                                disabled: discardLoading,
-                                // Style to indicate a potentially dangerous action
+                                className: `glass-button px-4 py-2 flex items-center ${discardLoading || showDiscardConfirmationMessage ? 'opacity-50 cursor-not-allowed' : ''}`,
+                                onClick: handleDiscardClick, // Updated onClick
+                                disabled: discardLoading || showDiscardConfirmationMessage, // Disable if confirm message is shown or already discarding
                                 style: { backgroundColor: 'var(--color-log-error)', color: 'var(--color-text-primary)' } 
                             },
                             discardLoading
                                 ? e(Icon, { name: 'spinner', className: 'mr-2 animate-spin' })
-                                : e(Icon, { name: 'trash', className: 'mr-2' }), // Example icon for discard
+                                : e(Icon, { name: 'trash', className: 'mr-2' }),
                             discardLoading ? 'Discarding...' : 'Discard Changes'
                         )
                     ),
+                    // Custom Confirmation UI for Discarding Changes
+                    showDiscardConfirmationMessage && e(
+                        'div',
+                        { className: 'my-4 p-4 rounded-md glass-dark border border-red-500/50' }, // Styled confirmation box
+                        e('h4', { className: 'text-lg font-semibold text-red-300 mb-2' }, 
+                            e(Icon, { name: 'exclamation-triangle', className: 'mr-2' }),
+                            'Confirm Destructive Action'
+                        ),
+                        e('p', { className: 'text-sm mb-1' }, 'You are about to discard ALL local changes in this repository.'),
+                        e('ul', { className: 'list-disc list-inside text-sm mb-3 pl-4' },
+                            e('li', null, 'All uncommitted changes to tracked files will be PERMANENTLY LOST (git reset --hard HEAD).'),
+                            e('li', null, 'All untracked files and directories will be PERMANENTLY DELETED (git clean -fd).')
+                        ),
+                        e('p', { className: 'text-sm font-bold text-red-300 mb-3' }, 'THIS ACTION CANNOT BE UNDONE.'),
+                        e('div', { className: 'flex justify-end gap-3' },
+                            e('button', {
+                                className: 'glass-button px-4 py-2 text-sm',
+                                onClick: handleCancelDiscard,
+                                style: { backgroundColor: 'var(--color-glass-light-bg)', color: 'var(--color-text-primary)'}
+                            }, 'Cancel'),
+                            e('button', {
+                                className: 'glass-button px-4 py-2 text-sm',
+                                onClick: handleConfirmDiscard,
+                                style: { backgroundColor: 'var(--color-log-error)',  color: 'var(--color-text-primary)' }
+                            }, 'Confirm Discard')
+                        )
+                    ),
+
                     // Display Git Status Output or Discard Error/Success
-                    (repoStatusOutput || statusError || discardError || (discardLoading === false && !discardError && !statusLoading && !pullInProgress && selectedRepo.lastDiscardMessage)) && e(
+                    (!showDiscardConfirmationMessage && (repoStatusOutput || statusError || discardError || (discardLoading === false && !discardError && !statusLoading && !pullInProgress && selectedRepo.lastDiscardMessage))) && e(
                         'div',
                         { className: 'mt-4' },
                         (repoStatusOutput || statusError) && e(React.Fragment, null, // Group status related elements
