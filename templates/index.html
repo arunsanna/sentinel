@@ -21,8 +21,53 @@
 <body class="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600">
     <div id="root"></div>
     
-    <!-- Custom JavaScript -->
-    <script src="/static/js/app.js" defer></script>
+    <!-- Component Scripts -->
+    <!-- Base components first -->
+    <script src="/static/js/components/Icon.js" defer></script>
+    <!-- Other components -->
+    <script src="/static/js/components/ThemeToggleButton.js" defer></script>
+    <script src="/static/js/components/Header.js" defer></script>
+    <script src="/static/js/components/Sidebar.js" defer></script>
+    <script src="/static/js/components/RepoDetailModal.js" defer></script>
+    <!-- Add other component scripts here as they are created, e.g.: -->
+    <!-- <script src="/static/js/components/ControlsBar.js" defer></script> -->
+    <!-- <script src="/static/js/components/RepositoryCard.js" defer></script> -->
+    <!-- <script src="/static/js/components/ScanStatusDisplay.js" defer></script> -->
+    <!-- <script src="/static/js/components/DirectoryBrowserModal.js" defer></script> -->
+    <!-- <script src="/static/js/components/LoadingSkeleton.js" defer></script> -->
+    <!-- <script src="/static/js/components/EmptyState.js" defer></script> -->
+
+    <!-- Page Components -->
+    <script src="/static/js/pages/GitRepoManagerPage.js" defer></script>
+
+    <!-- Main App Shell -->
+    <script src="/static/js/App.js" defer></script>
+
+    <!-- Initialize React App -->
+    <script type="text/javascript" defer>
+        // Ensure this runs after all component scripts are loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const domContainer = document.getElementById('root');
+            if (domContainer) {
+                // Ensure React and ReactDOM are available
+                if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+                    // Ensure App component is defined
+                    if (typeof App !== 'undefined') {
+                        const root = ReactDOM.createRoot(domContainer);
+                        root.render(React.createElement(App));
+                    } else {
+                        console.error('App component is not defined. Check script loading order and file paths.');
+                        domContainer.innerHTML = '<div style="color: red; padding: 20px;">Error: App component not loaded. See console.</div>';
+                    }
+                } else {
+                    console.error('React or ReactDOM is not loaded. Check script tags.');
+                    domContainer.innerHTML = '<div style="color: red; padding: 20px;">Error: React or ReactDOM not loaded. See console.</div>';
+                }
+            } else {
+                console.error('Root element #root not found in the DOM.');
+            }
+        });
+    </script>
 
     <noscript>
         <div class="p-8 text-center text-white">

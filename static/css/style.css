@@ -1,25 +1,27 @@
 :root {
-    --color-background: #374151; /* Dark Gray (Tailwind gray-700) */
-    --color-text-primary: #e2e8f0; /* Light Slate (Tailwind slate-200) */
-    --color-text-secondary: #a0aec0; /* Tailwind gray-500 */
-    --color-accent: #38b2ac; /* Teal Accent (Tailwind teal-500) */
-    --color-accent-hover: #319795; /* Darker Teal (Tailwind teal-600) */
-    --color-accent-focus: #4fd1c5; /* Lighter Teal (Tailwind teal-400) */
-    --color-accent-focus-shadow: rgba(79, 209, 197, 0.3);
-    --color-accent-subtle-bg: rgba(79, 209, 197, 0.2); /* For bg-teal-500/20 like effects */
-    --color-accent-subtle-text: #a7f3d0; /* Light teal text for on subtle bg */
+    /* Default to dark theme variables */
+    --color-background-primary: #0f172a; /* slate-900 */
+    --color-background-secondary: #1e293b; /* slate-800 */
+    --color-text-primary: #f1f5f9; /* slate-100 */
+    --color-text-secondary: #94a3b8; /* slate-400 */
+    --color-accent: #14b8a6; /* teal-500 */
+    --color-accent-hover: #0d9488; /* teal-600 */
+    --color-accent-focus: #2dd4bf; /* teal-400 */ /* Adjusted for better visibility */
+    --color-accent-focus-shadow: rgba(45, 212, 191, 0.3);
+    --color-accent-subtle-bg: rgba(20, 184, 166, 0.15); /* teal-500 with low opacity */
+    --color-accent-subtle-text: #5eead4; /* lighter teal for text on subtle bg */
 
-    --color-glass-bg: rgba(255, 255, 255, 0.08);
-    --color-glass-border: rgba(255, 255, 255, 0.12);
-    --color-glass-shadow: rgba(0, 0, 0, 0.37);
+    --color-glass-bg: rgba(30, 41, 59, 0.6); /* slate-800 with opacity for dark theme */
+    --color-glass-border: rgba(255, 255, 255, 0.1);
+    --color-glass-shadow: rgba(0, 0, 0, 0.3);
 
-    --color-glass-light-bg: rgba(255, 255, 255, 0.1);
-    --color-glass-light-border: rgba(255, 255, 255, 0.15);
+    --color-glass-light-bg: rgba(51, 65, 85, 0.6); /* slate-700 with opacity for dark theme */
+    --color-glass-light-border: rgba(255, 255, 255, 0.12);
     --color-glass-light-shadow: rgba(0, 0, 0, 0.25);
     
-    --color-glass-dark-bg: rgba(0, 0, 0, 0.3);
+    --color-glass-dark-bg: rgba(15, 23, 42, 0.65); /* slate-900 with opacity for dark theme */
     --color-glass-dark-border: rgba(255, 255, 255, 0.08);
-    --color-glass-dark-shadow: rgba(0, 0, 0, 0.45);
+    --color-glass-dark-shadow: rgba(0, 0, 0, 0.35);
 
     --color-button-bg: var(--color-accent);
     --color-button-text: #ffffff;
@@ -31,405 +33,295 @@
     --color-input-focus-border: var(--color-accent-focus);
     --color-input-focus-shadow: var(--color-accent-focus-shadow);
 
-    --color-log-container-bg: rgba(17, 24, 39, 0.8); /* Near black, semi-transparent */
-    --color-log-info: #93c5fd; /* Light Blue */
-    --color-log-success: #86efac; /* Light Green */
-    --color-log-error: #fca5a5; /* Light Red */
+    --color-log-container-bg: rgba(17, 24, 39, 0.85); /* Near black, semi-transparent */
+    --color-log-info: #60a5fa; /* blue-400 */
+    --color-log-success: #4ade80; /* green-400 */
+    --color-log-error: #f87171; /* red-400 */
     
-    --color-scrollbar-track: rgba(255, 255, 255, 0.1);
-    --color-scrollbar-thumb: rgba(255, 255, 255, 1);
+    --color-scrollbar-track: rgba(255, 255, 255, 0.05);
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.2);
+    --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 
     --color-path-tooltip-bg: rgba(17, 24, 39, 0.95);
-    --color-shimmer-gradient: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.2) 20%, rgba(255, 255, 255, 0.5) 60%, rgba(255, 255, 255, 0));
+    --color-shimmer-gradient: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.2) 60%, rgba(255, 255, 255, 0));
     --color-text-on-glass-shadow: rgba(0, 0, 0, 0.5);
     --color-focus-outline: var(--color-accent-focus);
 
-    --color-green-badge-bg: #38a169; /* Tailwind green-600 for 'New' badge */
+    --color-green-badge-bg: #10b981; /* emerald-500 */
     --color-green-badge-text: #ffffff;
 }
 
 body.light-theme {
-    --color-background: #f7fafc; /* Tailwind gray-100 */
-    --color-text-primary: #2d3748; /* Tailwind gray-800 */
-    --color-text-secondary: #718096; /* Tailwind gray-600 */
-    
-    /* Accent colors can remain the same or be adjusted for light theme */
-    /* --color-accent: #38b2ac; */
-    /* --color-accent-hover: #319795; */
-    /* --color-accent-focus: #4fd1c5; */
-    /* --color-accent-focus-shadow: rgba(79, 209, 197, 0.3); */
-    --color-accent-subtle-bg: rgba(79, 209, 197, 0.15);
-    --color-accent-subtle-text: var(--color-accent-hover);
+    --color-background-primary: #f8fafc; /* slate-50 */
+    --color-background-secondary: #f1f5f9; /* slate-100 */
+    --color-text-primary: #0f172a; /* slate-900 */
+    --color-text-secondary: #475569; /* slate-600 */
+    --color-accent: #0d9488; /* teal-600 */
+    --color-accent-hover: #0f766e; /* teal-700 */
+    --color-accent-focus: #14b8a6; /* teal-500 */
+    --color-accent-focus-shadow: rgba(20, 184, 166, 0.3);
+    --color-accent-subtle-bg: rgba(20, 184, 166, 0.1);
+    --color-accent-subtle-text: #0f766e; /* teal-700 */
 
-
-    --color-glass-bg: rgba(255, 255, 255, 0.7); /* More opaque white */
-    --color-glass-border: rgba(0, 0, 0, 0.1);
+    --color-glass-bg: rgba(255, 255, 255, 0.7); 
+    --color-glass-border: rgba(0, 0, 0, 0.08);
     --color-glass-shadow: rgba(0, 0, 0, 0.1);
 
-    --color-glass-light-bg: rgba(255, 255, 255, 0.85);
-    --color-glass-light-border: rgba(0, 0, 0, 0.08);
+    --color-glass-light-bg: rgba(248, 250, 252, 0.75); /* slate-50 with opacity */
+    --color-glass-light-border: rgba(0, 0, 0, 0.07);
     --color-glass-light-shadow: rgba(0, 0, 0, 0.05);
     
-    --color-glass-dark-bg: rgba(0, 0, 0, 0.05); /* Lightly tinted dark for contrast */
+    --color-glass-dark-bg: rgba(226, 232, 240, 0.6); /* slate-200 with opacity */
     --color-glass-dark-border: rgba(0, 0, 0, 0.1);
-    --color-glass-dark-shadow: rgba(0, 0, 0, 0.15);
+    --color-glass-dark-shadow: rgba(0, 0, 0, 0.1);
 
-    /* --color-button-bg: var(--color-accent); */
-    /* --color-button-text: #ffffff; */
-    /* --color-button-hover-bg: var(--color-accent-hover); */
-
-    --color-input-bg: rgba(255, 255, 255, 0.9);
-    --color-input-border: rgba(0, 0, 0, 0.2);
+    --color-input-bg: #ffffff;
+    --color-input-border: #cbd5e1; /* slate-300 */
     --color-input-text: var(--color-text-primary);
-    /* --color-input-focus-border: var(--color-accent-focus); */
-    /* --color-input-focus-shadow: var(--color-accent-focus-shadow); */
 
-    --color-log-container-bg: rgba(229, 231, 235, 0.8); /* Light gray, semi-transparent */
-    --color-log-info: #3b82f6; /* Darker Blue */
-    --color-log-success: #10b981; /* Darker Green */
-    --color-log-error: #ef4444; /* Darker Red */
+    --color-log-container-bg: rgba(241, 245, 249, 0.85); /* slate-100, semi-transparent */
+    --color-log-info: #2563eb; /* blue-600 */
+    --color-log-success: #16a34a; /* green-600 */
+    --color-log-error: #dc2626; /* red-600 */
     
-    --color-scrollbar-track: rgba(0, 0, 0, 0.05);
-    --color-scrollbar-thumb: rgba(0, 0, 0, 0.4);
+    --color-scrollbar-track: rgba(0, 0, 0, 0.03);
+    --color-scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --color-scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
 
-    --color-path-tooltip-bg: rgba(42, 50, 61, 0.95); /* Darker tooltip for readability */
-    --color-shimmer-gradient: linear-gradient(90deg, rgba(0,0,0,0) 0, rgba(0,0,0,0.05) 20%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0));
-    --color-text-on-glass-shadow: rgba(0, 0, 0, 0.1);
-    /* --color-focus-outline: var(--color-accent-focus); */
+    --color-path-tooltip-bg: rgba(15, 23, 42, 0.95); /* slate-900 for contrast */
+    --color-shimmer-gradient: linear-gradient(90deg, rgba(0,0,0,0) 0, rgba(0,0,0,0.03) 20%, rgba(0,0,0,0.06) 60%, rgba(0,0,0,0));
 }
 
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--color-background);
-    min-height: 100vh;
+    font-family: 'Poppins', sans-serif; /* Using Poppins as specified in HTML */
+    background-color: var(--color-background-primary); /* Use CSS var for body background */
     color: var(--color-text-primary);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* General Glass Effect Base */
+.glass, .glass-light, .glass-dark {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 8px 32px 0 var(--color-glass-shadow);
+    border: 1px solid var(--color-glass-border);
 }
 
 .glass {
     background: var(--color-glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    border: 1px solid var(--color-glass-border);
-    box-shadow: 0 8px 32px 0 var(--color-glass-shadow);
-    transition: all 0.3s ease;
 }
-
-.glass-dark {
-    background: var(--color-glass-dark-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    border: 1px solid var(--color-glass-dark-border);
-    box-shadow: 0 8px 32px 0 var(--color-glass-dark-shadow);
-    transition: all 0.3s ease;
-}
-
 .glass-light {
     background: var(--color-glass-light-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    border: 1px solid var(--color-glass-light-border);
-    box-shadow: 0 8px 32px 0 var(--color-glass-light-shadow);
-    transition: all 0.3s ease;
+    border-color: var(--color-glass-light-border);
+}
+.glass-dark {
+    background: var(--color-glass-dark-bg);
+    border-color: var(--color-glass-dark-border);
 }
 
-/* Ensure ControlsBar items can wrap and align nicely */
-.controls-bar-grid { /* You might need to add this class to the main div in ControlsBar if flex alone isn't enough */
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    align-items: end; /* Aligns items to the bottom, useful if labels make heights uneven */
-}
-
-
-.glass-button {
-    background: var(--color-button-bg);
-    color: var(--color-button-text);
-    border-radius: 0.5rem;
-    border: 1px solid transparent; /* Simplified border for buttons */
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.glass-button:hover:not(:disabled) {
-    background: var(--color-button-hover-bg);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.glass-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
+/* Input elements with glass style */
 .glass-input {
     background: var(--color-input-bg);
     border: 1px solid var(--color-input-border);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
     color: var(--color-input-text);
-    transition: all 0.3s ease;
+    border-radius: 0.375rem; /* 6px */
+    padding: 0.5rem 0.75rem; /* 8px 12px */
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
-
 .glass-input:focus {
     outline: none;
     border-color: var(--color-input-focus-border);
     box-shadow: 0 0 0 3px var(--color-input-focus-shadow);
 }
+.glass-input::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+}
 
-.repo-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 50; /* Ensure this is higher than repo-detail if it's a separate overlay element */
-    display: flex;
+/* Button elements with glass style */
+.glass-button {
+    background: var(--color-button-bg);
+    color: var(--color-button-text);
+    border: none;
+    border-radius: 0.375rem; /* 6px */
+    padding: 0.5rem 1rem; /* 8px 16px */
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
-
-.repo-detail {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 800px;
-    max-height: 85vh;
-    z-index: 100; /* Ensure this is higher than overlay if they are siblings */
-    border-radius: 1rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Important for containing children like repo-detail-body */
+.glass-button:hover {
+    background: var(--color-button-hover-bg);
+}
+.glass-button:active {
+    transform: translateY(1px);
+}
+.glass-button:disabled,
+.glass-button.opacity-50 {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.glass-button.bg-teal-500\/80 { /* Specific for quick pull button */
+    background-color: rgba(20, 184, 166, 0.8); /* teal-500 with 80% opacity */
+}
+.glass-button.bg-teal-500\/80:hover {
+    background-color: rgba(13, 148, 136, 0.9); /* teal-600 with 90% opacity */
 }
 
-.repo-detail-body {
-    overflow-y: auto;
-    flex: 1; /* Allows this section to grow and fill available space */
-    padding: 1rem; /* Add padding here if not in the modal content's direct children */
-}
 
+/* Log container styles */
 .log-container {
     background-color: var(--color-log-container-bg);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    max-height: 12rem;
+    border-radius: 0.375rem; /* 6px */
+    padding: 0.75rem; /* 12px */
+    max-height: 20rem; /* 320px */
     overflow-y: auto;
-    margin-top: 1rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size: 0.75rem;
-    line-height: 1.25;
+    font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5;
+    color: var(--color-text-primary);
 }
-
-.log-info {
-    color: var(--color-log-info);
+.log-container p, .log-container div {
+    margin-bottom: 0.25rem;
 }
+.log-info { color: var(--color-log-info); }
+.log-success { color: var(--color-log-success); }
+.log-error { color: var(--color-log-error); }
 
-.log-success {
-    color: var(--color-log-success);
-}
 
-.log-error {
-    color: var(--color-log-error);
-}
-
-/* Custom scrollbar */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
-
 ::-webkit-scrollbar-track {
     background: var(--color-scrollbar-track);
     border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb {
-    background: var(--color-scrollbar-thumb) !important; 
+    background: var(--color-scrollbar-thumb);
     border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-scrollbar-thumb) !important; /* Consider a hover variant if desired */
+    background: var(--color-scrollbar-thumb-hover);
 }
 
-.repo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-    width: 100%;
-}
-
+/* Repo Card specific styles */
 .repo-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Ensure cards can grow if content differs */
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden; /* For effects like the 'New' badge */
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
-
 .repo-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px var(--color-glass-shadow);
+}
+.path-popover { /* For the path display on repo card hover */
+    background: var(--color-glass-light-bg);
+    border: 1px solid var(--color-glass-light-border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.path-wrapper {
-    position: relative; /* For tooltip positioning */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* Repo Detail Modal specific styles */
+.repo-modal-overlay {
+    background-color: rgba(0,0,0,0.6); /* Darker overlay */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
-
-.path-wrapper:hover .path-tooltip {
-    visibility: visible;
-    opacity: 1;
-}
-
-.path-tooltip {
-    visibility: hidden;
-    opacity: 0;
-    position: absolute;
-    left: 0;
-    top: 100%; /* Position below the path-wrapper */
-    z-index: 50; /* Ensure it's above other card content */
-    background: var(--color-path-tooltip-bg);
-    color: var(--color-text-primary); /* Assuming primary text color is suitable here */
-    padding: 0.5rem;
-    border-radius: 0.375rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    white-space: normal; /* Allow text to wrap */
-    word-break: break-all;
-    max-width: 300px;
-    font-size: 0.75rem;
-    transition: all 0.2s ease;
-    margin-top: 0.5rem; /* Small gap from the path text */
-}
-
-.path-popover { /* New class for the JS-controlled popover */
-    /* Using glass-light for background/border/shadow, so primarily positioning here */
-    /* Ensure it's above other card content if not already handled by z-index in glass-light */
-    /* The 'bottom-16' in JS is an example, adjust as needed or make it dynamic */
-    /* You might want to add specific max-height and overflow-y if paths can be very long */
-    max-height: 100px; /* Example max-height */
+.repo-detail { /* This is the modal content itself */
+    max-height: 90vh;
     overflow-y: auto;
+    width: clamp(300px, 90%, 800px); /* Responsive width */
+    margin: auto; /* Center it */
+    position: fixed; /* For centering */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50; /* Ensure it's above overlay */
+}
+.repo-detail-header, .repo-detail-body {
+    color: var(--color-text-primary);
 }
 
-.pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.pagination-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.375rem;
-    background: rgba(255, 255, 255, 0.1);
-    transition: all 0.2s ease;
-}
-
-.pagination-button:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.pagination-active {
-    background: var(--color-accent-subtle-bg); 
-    /* Consider if text color needs to change for active pagination button */
-}
-
-.fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.shimmer {
-    position: relative;
-    overflow: hidden;
-}
-
+/* Shimmer effect for loading skeleton */
 .shimmer::after {
     content: '';
     position: absolute;
     top: 0;
-    right: 0;
-    bottom: 0;
     left: 0;
-    transform: translateX(-100%);
-    background-image: var(--color-shimmer-gradient);
-    animation: shimmer 2s infinite;
-    pointer-events: none; /* Important for shimmer effect */
+    width: 100%;
+    height: 100%;
+    background: var(--color-shimmer-gradient);
+    animation: shimmer 1.5s infinite linear;
+    opacity: 0.5;
 }
-
 @keyframes shimmer {
+    0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
 }
-
-/* Improved focus styles for accessibility */
-:focus {
-    outline: 2px solid var(--color-focus-outline);
-    outline-offset: 2px;
+.repo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem; /* 24px */
 }
 
-/* High contrast text for better readability on glass backgrounds */
-.glass, .glass-dark, .glass-light {
-    text-shadow: 0 1px 1px var(--color-text-on-glass-shadow);
+/* New Layout Styles for Header, Sidebar, Main */
+/* Body is already styled with theme variables */
+
+header.fixed { /* Ensure header stays fixed */
+    /* className already has 'fixed top-0 left-0 right-0 z-30' */
+    /* Height can be implicitly set by padding, or explicitly: e.g., height: 4rem; */
 }
 
-/* Screen reader only class */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
+aside.fixed { /* Ensure sidebar stays fixed */
+    /* className already has 'fixed top-0 left-0 pt-20 z-20' */
+    /* pt-20 assumes header is roughly 5rem or 80px high. Adjust if header height changes. */
+    /* Example: if header is p-4 (1rem padding top/bottom) and text-2xl (1.5rem line-height), total ~3.5rem. Add border. ~4rem. */
+    /* So pt-16 (for 4rem header) or pt-20 (for 5rem header) in App.js for main content and sidebar top padding is important. */
 }
 
-/* Mobile optimizations */
-@media (max-width: 640px) {
-    .repo-detail {
-        width: 100%;
-        height: 100%;
-        max-height: 100vh;
-        max-width: 100vw;
-        border-radius: 0;
-        top: 0;
-        left: 0;
-        transform: none;
-    }
-    
-    .repo-detail-header { /* Ensure this class is used in your modal header */
-        padding: 1rem;
-    }
-    
-    /* .repo-detail-body padding is already defined, ensure it's appropriate */
-    
-    .repo-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
+main.flex-1 { /* Main content area */
+    /* className already has 'flex-1 ml-64 p-0 overflow-y-auto' */
+    /* ml-64 assumes sidebar is w-64 (16rem). Adjust if sidebar width changes. */
+    background-color: var(--color-background-secondary); /* So content area has a distinct bg */
 }
+
+/* Sidebar nav item active state - more pronounced */
+aside nav button.bg-teal-500\/40 { /* Targeting the active class from Sidebar.js */
+    /* Tailwind's bg-opacity classes are specific, so direct targeting is needed if not using CSS vars for this specific opacity */
+    background-color: rgba(20, 184, 166, 0.4) !important; /* teal-500 with 40% opacity */
+    box-shadow: 0 0 15px rgba(20, 184, 166, 0.3), inset 0 0 5px rgba(20, 184, 166, 0.2);
+    border-left: 3px solid var(--color-accent);
+    padding-left: calc(0.75rem - 3px); /* p-3 is 0.75rem. Adjust for the 3px border. */
+}
+aside nav button:hover {
+    background-color: rgba(20, 184, 166, 0.3); /* teal-500 with 30% opacity */
+}
+aside nav button.bg-teal-500\/40:hover {
+    background-color: rgba(20, 184, 166, 0.5) !important; /* Slightly more opaque on hover for active item */
+}
+
+/* Ensure body doesn't have the initial gradient if themes are applied */
+body.dark-theme, body.light-theme {
+    background-image: none; /* Remove initial gradient */
+    background-color: var(--color-background-primary);
+}
+
+/* Tailwind config (if you were using a tailwind.config.js) would go here for theme extensions */
+/* For now, we are using CSS variables and utility classes directly. */
