@@ -305,6 +305,15 @@ body {
     margin-top: 0.5rem; /* Small gap from the path text */
 }
 
+.path-popover { /* New class for the JS-controlled popover */
+    /* Using glass-light for background/border/shadow, so primarily positioning here */
+    /* Ensure it's above other card content if not already handled by z-index in glass-light */
+    /* The 'bottom-16' in JS is an example, adjust as needed or make it dynamic */
+    /* You might want to add specific max-height and overflow-y if paths can be very long */
+    max-height: 100px; /* Example max-height */
+    overflow-y: auto;
+}
+
 .pagination {
     display: flex;
     align-items: center;

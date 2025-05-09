@@ -101,37 +101,30 @@
 
     // Component: RepositoryCard
     function RepositoryCard({ repo, onSelectRepo, onQuickPull, isPulling }) {
+        const [isPathVisible, setIsPathVisible] = React.useState(false); // Local state for path visibility
+
+        const togglePathVisibility = (event) => {
+            event.stopPropagation(); // Prevent card click when toggling path
+            setIsPathVisible(!isPathVisible);
+        };
+
         return e(
             'div',
             { 
-                key: repo.id,
-                className: 'glass p-5 hover:shadow-lg transition-all rounded-xl relative group repo-card', // Added repo-card class
-                role: 'button',
-                tabIndex: "0",
-                'aria-label': `View details for ${repo.name}`,
-                onClick: () => onSelectRepo(repo),
-                onKeyDown: (event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                        onSelectRepo(repo);
-                        event.preventDefault();
-                    }
-                }
+                className: 'glass p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out cursor-pointer repo-card group relative', // Added relative for popover
+                onClick: () => onSelectRepo(repo)
             },
-            new Date(repo.last_modified) > new Date(Date.now() - 86400000) && e(
-                'div',
-                { 
-                    className: 'absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full',
-                    'aria-label': 'Updated in the last 24 hours'
-                },
-                'New'
-            ),
+            // Quick Pull Button - positioned top-right
             e(
                 'div',
-                { className: 'absolute right-3 top-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity' },
+                { 
+                    className: 'absolute right-3 top-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity',
+                    onClick: (event) => event.stopPropagation() 
+                },
                 e(
                     'button',
                     {
-                        className: `bg-teal-500/80 hover:bg-teal-600 p-2 rounded-full text-white ${isPulling ? 'opacity-50 cursor-not-allowed' : ''}`, // Updated color
+                        className: `bg-teal-500/80 hover:bg-teal-600 p-2 rounded-full text-white ${isPulling ? 'opacity-50 cursor-not-allowed' : ''}`,
                         'aria-label': 'Quick pull repository',
                         title: 'Quick pull repository',
                         disabled: isPulling,
@@ -142,27 +135,39 @@
                             }
                         }
                     },
-                    isPulling
-                        ? e(Icon, { name: 'spinner', className: 'animate-spin' })
-                        : e(Icon, { name: 'sync-alt' })
+                    isPulling ? e(Icon, { name: 'spinner', className: 'animate-spin' }) : e(Icon, { name: 'download' })
                 )
             ),
-            e('h3', { className: 'font-bold text-lg mb-3 flex items-center' }, 
-                e(Icon, { name: 'folder', className: 'mr-2 text-teal-400 flex-shrink-0' }), // Updated color
+            e('h3', { className: 'font-bold text-lg mb-1 flex items-center' }, // Reduced mb
+                e(Icon, { name: 'folder', className: 'mr-2 text-teal-400 flex-shrink-0' }),
                 e('span', { className: 'truncate', title: repo.name }, repo.name)
             ),
-            e(
-                'div',
-                { className: 'path-wrapper mb-4' },
-                e('p', { 
-                    className: 'text-sm opacity-80 bg-black/10 p-2 rounded truncate', 
-                    title: repo.path 
-                }, repo.path),
-                e('div', { className: 'path-tooltip' }, repo.path)
+            // Path display replaced with an icon and conditional popover
+            e('div', { className: 'text-xs text-gray-400 mb-3 flex items-center' }, // Use text-gray-400 from theme
+                e(Icon, { name: 'map-marker-alt', className: 'mr-1 text-gray-500' }), // Path icon
+                e('span', { className: 'truncate flex-grow' }, 'Path: Click icon to view'), // Placeholder text
+                e(
+                    'button',
+                    {
+                        onClick: togglePathVisibility,
+                        className: 'ml-2 p-1 rounded hover:bg-white/10 focus:outline-none',
+                        title: isPathVisible ? 'Hide path' : 'Show path',
+                        'aria-label': isPathVisible ? 'Hide full path' : 'Show full path'
+                    },
+                    e(Icon, { name: isPathVisible ? 'eye-slash' : 'eye', className: 'text-teal-400' })
+                )
             ),
-            e(
+            isPathVisible && e(
                 'div',
-                { className: 'mt-auto pt-2 border-t border-white/10 flex justify-between items-center' },
+                { 
+                    className: 'absolute left-4 right-4 bottom-16 mb-1 p-3 rounded-md shadow-lg z-10 glass-light path-popover', // Use glass-light for popover
+                    onClick: (e) => e.stopPropagation() // Prevent card click if popover is clicked
+                },
+                e('p', { className: 'text-xs break-all' }, repo.path)
+            ),
+            // End of new path display logic
+            e('p', { className: 'text-sm opacity-80 mb-1 line-clamp-2' }, repo.description || 'No description available.'),
+            e('div', { className: 'mt-auto pt-2 border-t border-white/10 flex justify-between items-center' },
                 e('div', { className: 'text-xs opacity-70 flex items-center' },
                     e(Icon, { name: 'clock', className: 'mr-2 text-teal-300' }), // Updated color
                     formatTimeAgo(new Date(repo.last_modified))
